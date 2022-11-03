@@ -1,0 +1,55 @@
+#ifndef __GAME_H
+#define __GAME_H
+#include <stdint.h>
+#include "actor.h"
+#include "map.h"
+
+class CMap;
+
+class CGame
+{
+public:
+    CGame();
+    ~CGame();
+
+    bool init();
+    bool loadLevel();
+    void drawScreen();
+    //  int16_t &mx();
+    //   int16_t &my();
+    bool move(int dir);
+    void manageMonsters();
+    void managePlayer();
+    void animate();
+    static Pos translate(const Pos p, int aim);
+    void consume();
+    static bool hasKey(uint8_t c);
+    void addKey(uint8_t c);
+    bool goalCount();
+
+    static CMap &getMap();
+    void nextLevel();
+
+protected:
+    int m_level = 0;
+    int m_score = 0;
+    int m_diamonds = 0;
+    static uint8_t m_keys[6];
+
+    CActor player;
+    void clearAttr(u_int8_t attr);
+
+    // monsters
+    enum
+    {
+        MAX_MONSTERS = 128,
+        NO_ANIMZ = 255,
+    };
+
+    CActor m_monsters[MAX_MONSTERS];
+    int m_monsterCount;
+    bool findMonsters();
+    int addMonster(const CActor actor);
+    int findMonsterAt(int x, int y);
+};
+#endif
