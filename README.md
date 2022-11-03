@@ -24,8 +24,8 @@ Here are the wiring arragements for the various parts needed.
 
 ST7789
 ==================================================
+https://www.aliexpress.com/item/1005004343881408.html
 
-|-----------|---------|-----------|
 | ST7789    |wirecolor| GPIO Pin  |
 |-----------|---------|-----------|
 |SDK/MISO   | purple  |           |
@@ -37,19 +37,17 @@ ST7789
 |CS         | white   |25 ???     |
 |GRN        | black   |           |
 |VCC        | red     |3.3v or 5v |
-|-----------|---------|-----------|
 
 
 Joystick
 ===================================================
+https://www.aliexpress.com/item/32345829014.html
 
-|-----------|---------|-----------|
 | ST7789    |wirecolor| GPIO Pin  |
 |-----------|---------|-----------|
 |VRX 		| BROWN   | 35        |
 |VRY 		| WHITE   | 34        |
 |GRN		| black   |           |
 |VCC		| red	  |	3.3v      |
-|-----------|---------|-----------|
 
 https://github.com/DiegoPaezA/ESP32-freeRTOS
