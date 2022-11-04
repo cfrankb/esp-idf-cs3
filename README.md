@@ -1,6 +1,6 @@
 # About
 
-This project is a game port to ESP-32 microcontroller an MS-DOS Game,
+This project is a game port to ESP-32 microcontroller of an MS-DOS Game,
 
 Current status is alpha. 90% of the core mechanic has been implemented.
 
@@ -12,9 +12,27 @@ Current status is alpha. 90% of the core mechanic has been implemented.
 
 ![Image](images/20221103_155303-50.jpg 'icon')
 
-Here are the wiring arragements for the various parts needed.
+# Software required
 
-# ST7789
+esp-idf v4.4 or later.
+
+
+# Installation
+
+This project is based in part on: https://github.com/nopnop2002/esp-idf-st7789
+
+```Shell
+git clone https://github.com/cfrankb/esp-idf-cs3.git
+cd esp-idf-cs3/
+idf.py set-target {esp32/esp32s2/esp32s3/esp32c3}
+idf.py menuconfig
+idf.py flash
+```
+
+
+# Wiring arragements for the various parts needed.
+
+## ST7789
 
 https://www.aliexpress.com/item/1005004343881408.html
 
@@ -30,7 +48,7 @@ https://www.aliexpress.com/item/1005004343881408.html
 | GRN      | black     |            |
 | VCC      | red       | 3.3v or 5v |
 
-# Joystick
+## Joystick
 
 https://www.aliexpress.com/item/32345829014.html
 
