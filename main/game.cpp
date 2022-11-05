@@ -63,10 +63,17 @@ uint8_t CGame::m_keys[6];
 CGame::CGame()
 {
     CTileSet::toggleFlipColors(true);
+    m_monsterMax = MAX_MONSTERS;
+    m_monsters = new CActor[m_monsterMax];
+    m_monsterCount = 0;
 }
 
 CGame::~CGame()
 {
+    if (m_monsters)
+    {
+        delete[] m_monsters;
+    }
 }
 
 CMap &CGame::getMap()
@@ -195,7 +202,7 @@ void CGame::drawScreen()
 {
     std::lock_guard<std::mutex> lk(g_mutex);
 
-    int64_t t0 = esp_timer_get_time();
+    //    int64_t t0 = esp_timer_get_time();
     const int cols = CONFIG_WIDTH / TILESIZE;
     const int rows = CONFIG_HEIGHT / TILESIZE;
     const int lmx = std::max(0, player.getX() - cols / 2);
@@ -206,7 +213,6 @@ void CGame::drawScreen()
     uint16_t *tiledata;
     for (int y = 0; y < rows; ++y)
     {
-        //    int64_t t0 = esp_timer_get_time();
         if (y + my >= map.hei())
         {
             break;
@@ -241,18 +247,15 @@ void CGame::drawScreen()
             buffer.drawFont(bx * 8, 0, font, tmp, YELLOW);
         }
         display.drawBuffer(0, y * TILESIZE, buffer, 1);
-        //      int64_t t1 = esp_timer_get_time();
-        //       printf("Y: %d time: %ld\n", y, (long)(t1 - t0) / 1000);
     }
 
-    int64_t t1 = esp_timer_get_time();
+    // int64_t t1 = esp_timer_get_time();
     //  printf("time: %ld\n", (long)(t1 - t0) / 1000);
 }
 
 bool CGame::findMonsters()
 {
-    memset(m_monsters, 0, sizeof(m_monsters));
-    int i = 0;
+    m_monsterCount = 0;
     for (int y = 0; y < map.hei(); ++y)
     {
         for (int x = 0; x < map.len(); ++x)
@@ -263,19 +266,26 @@ bool CGame::findMonsters()
                 def.type == TYPE_VAMPLANT ||
                 def.type == TYPE_DRONE)
             {
-                m_monsters[i] = CActor(x, y, def.type);
-                ++i;
+                addMonster(CActor(x, y, def.type));
             }
         }
     }
-    printf("%d monsters found.\n", i);
-    m_monsterCount = i;
+    printf("%d monsters found.\n", m_monsterCount);
     return true;
 }
 
 int CGame::addMonster(const CActor actor)
 {
+    if (m_monsterCount >= m_monsterMax)
+    {
+        m_monsterMax += GROWBY_MONSTERS;
+        CActor *t = new CActor[m_monsterMax];
+        memcpy(reinterpret_cast<void *>(t), m_monsters, m_monsterCount * sizeof(CActor));
+        delete[] m_monsters;
+        m_monsters = t;
+    }
     m_monsters[m_monsterCount++] = actor;
+
     return m_monsterCount;
 }
 

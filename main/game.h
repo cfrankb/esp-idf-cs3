@@ -15,8 +15,6 @@ public:
     bool init();
     bool loadLevel();
     void drawScreen();
-    //  int16_t &mx();
-    //   int16_t &my();
     bool move(int dir);
     void manageMonsters();
     void managePlayer();
@@ -43,11 +41,13 @@ protected:
     enum
     {
         MAX_MONSTERS = 128,
+        GROWBY_MONSTERS = 64,
         NO_ANIMZ = 255,
     };
 
-    CActor m_monsters[MAX_MONSTERS];
+    CActor *m_monsters;
     int m_monsterCount;
+    int m_monsterMax;
     bool findMonsters();
     int addMonster(const CActor actor);
     int findMonsterAt(int x, int y);
