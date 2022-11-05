@@ -91,11 +91,12 @@ uint16_t *CBuffer::next(int &len, int &hei)
 
 void CBuffer::fill(const uint16_t color)
 {
+    const u_int16_t fcolor = flipColor(color);
     if (m_buffer)
     {
         for (int i = 0; i < m_len * m_hei; ++i)
         {
-            m_buffer[i] = color;
+            m_buffer[i] = fcolor;
         }
     }
 }
@@ -112,7 +113,7 @@ void CBuffer::forget()
 
 void CBuffer::drawFont(int x, int y, CFont &font, const char *s, uint16_t color)
 {
-    u_int16_t fcolor = flipColor(color);
+    const u_int16_t fcolor = flipColor(color);
     for (int j = 0; s[j]; ++j)
     {
         int u = s[j] < 127 ? s[j] - 32 : 0;
@@ -127,5 +128,19 @@ void CBuffer::drawFont(int x, int y, CFont &font, const char *s, uint16_t color)
             }
             o += m_len;
         }
+    }
+}
+
+void CBuffer::drawRect(const Rect &rect, uint16_t color)
+{
+    const uint16_t fcolor = flipColor(color);
+    uint16_t *buf = m_buffer + rect.x + rect.y * m_len;
+    for (int y = 0; y < rect.height; ++y)
+    {
+        for (int x = 0; x < rect.width; ++x)
+        {
+            buf[x] = fcolor;
+        }
+        buf += m_len;
     }
 }

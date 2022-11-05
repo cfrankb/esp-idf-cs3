@@ -66,6 +66,7 @@ CGame::CGame()
     m_monsterMax = MAX_MONSTERS;
     m_monsters = new CActor[m_monsterMax];
     m_monsterCount = 0;
+    m_health = 0;
 }
 
 CGame::~CGame()
@@ -83,9 +84,9 @@ CMap &CGame::getMap()
 
 bool CGame::move(int aim)
 {
-    if (player.canMove(aim))
+    if (m_player.canMove(aim))
     {
-        player.move(aim);
+        m_player.move(aim);
         consume();
         return true;
     }
@@ -95,34 +96,40 @@ bool CGame::move(int aim)
 
 void CGame::consume()
 {
-    uint8_t pu = player.getPU();
+    uint8_t pu = m_player.getPU();
     const TileDef def = getTileDef(pu);
 
     if (def.type == TYPE_PICKUP)
     {
         m_score += def.score;
-        player.setPU(TILES_BLANK);
+        m_player.setPU(TILES_BLANK);
+        addHealth(def.health);
     }
     else if (def.type == TYPE_KEY)
     {
         m_score += def.score;
-        player.setPU(TILES_BLANK);
+        m_player.setPU(TILES_BLANK);
         addKey(pu);
+        addHealth(def.health);
     }
     else if (def.type == TYPE_DIAMOND)
     {
         m_score += def.score;
-        player.setPU(TILES_BLANK);
+        m_player.setPU(TILES_BLANK);
         --m_diamonds;
+        addHealth(def.health);
+    }
+    else if (def.type == TYPE_SWAMP)
+    {
+        addHealth(-1);
     }
 
     // trigger key
-    int x = player.getX();
-    int y = player.getY();
+    int x = m_player.getX();
+    int y = m_player.getY();
     u_int8_t attr = map.getAttr(x, y);
     if (attr != 0)
     {
-        printf("attr%d\n", attr);
         map.setAttr(x, y, 0);
         clearAttr(attr);
     }
@@ -178,9 +185,11 @@ bool CGame::loadLevel()
     Pos pos = map.findFirst(TILES_ANNIE2);
     printf("Player at: %d %d\n", pos.x, pos.y);
     // map.read("/spiffs/level01.dat");
-    player = CActor(pos, TYPE_PLAYER, AIM_DOWN);
+    m_player = CActor(pos, TYPE_PLAYER, AIM_DOWN);
     m_diamonds = map.count(TILES_DIAMOND);
     memset(m_keys, 0, sizeof(m_keys));
+
+    m_health = DEFAULT_HEALTH;
 
     findMonsters();
     return true;
@@ -205,8 +214,8 @@ void CGame::drawScreen()
     //    int64_t t0 = esp_timer_get_time();
     const int cols = CONFIG_WIDTH / TILESIZE;
     const int rows = CONFIG_HEIGHT / TILESIZE;
-    const int lmx = std::max(0, player.getX() - cols / 2);
-    const int lmy = std::max(0, player.getY() - rows / 2);
+    const int lmx = std::max(0, m_player.getX() - cols / 2);
+    const int lmy = std::max(0, m_player.getY() - rows / 2);
     const int mx = std::min(lmx, map.len() > cols ? map.len() - cols : 0);
     const int my = std::min(lmy, map.hei() > rows ? map.hei() - rows : 0);
 
@@ -223,7 +232,7 @@ void CGame::drawScreen()
             int i = map.at(x + mx, y + my);
             if (i == TILES_ANNIE2)
             {
-                tiledata = playerTiles[player.getAim() * 4];
+                tiledata = playerTiles[m_player.getAim() * 4 + x % 3];
             }
             else
             {
@@ -245,6 +254,11 @@ void CGame::drawScreen()
             bx += strlen(tmp);
             sprintf(tmp, "DIAMONDS %.2d", m_diamonds);
             buffer.drawFont(bx * 8, 0, font, tmp, YELLOW);
+        }
+        else if (y == rows - 1)
+        {
+            buffer.drawRect(
+                Rect{.x = 4, .y = 4, .width = std::min(m_health / 2, CONFIG_WIDTH - 4), .height = 8}, LIME);
         }
         display.drawBuffer(0, y * TILESIZE, buffer, 1);
     }
@@ -313,6 +327,11 @@ void CGame::manageMonsters()
         const TileDef &def = getTileDef(c);
         if (def.type == TYPE_MONSTER)
         {
+            if (actor.isPlayerThere(actor.getAim()))
+            {
+                addHealth(-6);
+            }
+
             int aim = actor.findNextDir();
             if (aim != AIM_NONE)
             {
@@ -345,7 +364,7 @@ void CGame::manageMonsters()
                 const TileDef def = getTileDef(c);
                 if (def.type == TYPE_PLAYER)
                 {
-                    printf("ouch!\n");
+                    addHealth(-1);
                 }
                 elif (def.type == TYPE_SWAMP)
                 {
@@ -422,6 +441,7 @@ bool CGame::hasKey(uint8_t c)
     }
     return false;
 }
+
 void CGame::addKey(uint8_t c)
 {
     for (int i = 0; i < sizeof(m_keys); ++i)
@@ -463,5 +483,17 @@ void CGame::clearAttr(u_int8_t attr)
                 map.setAttr(x, y, 0);
             }
         }
+    }
+}
+
+void CGame::addHealth(int hp)
+{
+    if (hp > 0)
+    {
+        m_health = std::min(m_health + hp, static_cast<int>(MAX_HEALTH));
+    }
+    else if (hp < 0)
+    {
+        m_health = std::max(m_health + hp, 0);
     }
 }

@@ -14,4 +14,5 @@ uint16_t flipColor(const uint16_t c);
 #define YELLOW 0xFFE0
 #define CYAN 0x07FF
 #define PURPLE 0xF81F
+#define LIME 0x0f0f
 #endif

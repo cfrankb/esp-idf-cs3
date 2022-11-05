@@ -3,6 +3,14 @@
 
 #include <stdint.h>
 
+typedef struct
+{
+    int x;
+    int y;
+    int width;
+    int height;
+} Rect;
+
 class CFont;
 class CBuffer
 {
@@ -15,6 +23,7 @@ public:
     void drawTile(int x, int y, uint16_t *tile);
     void drawTile32(const int x, const int y, uint16_t *tile);
     void drawFont(int x, int y, CFont &font, const char *s, uint16_t color = 0xffff);
+    void drawRect(const Rect &rect, uint16_t color = 0xffff);
     uint16_t *buffer();
 
     uint16_t *start(int &hei, int &len);

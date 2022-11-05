@@ -29,12 +29,13 @@ public:
     void nextLevel();
 
 protected:
+    int m_health = 0;
     int m_level = 0;
     int m_score = 0;
     int m_diamonds = 0;
     static uint8_t m_keys[6];
 
-    CActor player;
+    CActor m_player;
     void clearAttr(u_int8_t attr);
 
     // monsters
@@ -43,6 +44,8 @@ protected:
         MAX_MONSTERS = 128,
         GROWBY_MONSTERS = 64,
         NO_ANIMZ = 255,
+        MAX_HEALTH = 255,
+        DEFAULT_HEALTH = 64,
     };
 
     CActor *m_monsters;
@@ -51,5 +54,7 @@ protected:
     bool findMonsters();
     int addMonster(const CActor actor);
     int findMonsterAt(int x, int y);
+
+    void addHealth(int hp);
 };
 #endif
