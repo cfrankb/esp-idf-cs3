@@ -1,7 +1,6 @@
 #include <cstring>
 #include <algorithm>
 
-#include "freertos/FreeRTOS.h"
 #include "esp_log.h"
 #include "display.h"
 #include "tileset.h"
@@ -10,7 +9,6 @@
 #include "driver.h"
 
 static const char *TAG = "display";
-static const int SPI_Data_Mode = 1;
 
 CDisplay::CDisplay()
 {
@@ -54,8 +52,14 @@ bool CDisplay::init()
 
     lcdInit(&m_dev, model, CONFIG_WIDTH, CONFIG_HEIGHT, CONFIG_OFFSETX, CONFIG_OFFSETY);
 
+#ifdef CONFIG_INVERSION_TRUE
+    ESP_LOGI(TAG, "Enable Display Inversion");
+    lcdInversionOn(&m_dev);
+#endif
+#ifdef CONFIG_INVERSION_FALSE
     ESP_LOGI(TAG, "Disable Display Inversion");
     lcdInversionOff(&m_dev);
+#endif
     fill(BLACK);
 
     return true;
@@ -121,14 +125,7 @@ bool CDisplay::drawTile(uint16_t x, uint16_t y, uint16_t *tile, int mode)
         uint16_t _y1 = y + dev->_offsety;
         uint16_t _y2 = _y1 + hei;
 
-        spi_master_write_command(dev, 0x2A); // set column(x) address
-        spi_master_write_addr(dev, _x1, _x2);
-        spi_master_write_command(dev, 0x2B); // set Page(y) address
-        spi_master_write_addr(dev, _y1, _y2);
-        spi_master_write_command(dev, 0x2C); //	Memory Write
-
-        // shared
-        spi_master_write_colors(dev, tile, size);
+        lcdDrawTile(dev, RectXY{_x1, _x2, _y1, _y2}, size, tile, true);
     }
     return true;
 }
@@ -156,13 +153,8 @@ bool CDisplay::drawBuffer(uint16_t x, uint16_t y, CBuffer &buffer)
         _y1 = y + dev->_offsety;
         _y2 = _y1 + hei;
 
-        spi_master_write_command(dev, 0x2A); // set column(x) address
-        spi_master_write_addr(dev, _x1, _x2);
-        spi_master_write_command(dev, 0x2B); // set Page(y) address
-        spi_master_write_addr(dev, _y1, _y2);
-        spi_master_write_command(dev, 0x2C); //	Memory Write
-        gpio_set_level(dev->_dc, SPI_Data_Mode);
-        spi_master_write_byte(dev->_SPIHandle, reinterpret_cast<uint8_t *>(data), size * 2);
+        lcdDrawTile(dev, RectXY{_x1, _x2, _y1, _y2}, size, data, false);
+
         y += hei;
         data = buffer.next(len, hei);
     }

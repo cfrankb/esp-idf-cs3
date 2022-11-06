@@ -16,7 +16,6 @@ Current status is alpha. 90% of the core mechanic has been implemented.
 
 esp-idf v4.4 or later.
 
-
 # Installation
 
 This project is based in part on: https://github.com/nopnop2002/esp-idf-st7789
@@ -29,8 +28,12 @@ idf.py menuconfig
 idf.py flash
 ```
 
+# Tested with this hardware
 
-# Wiring arragements for the various parts needed.
+| Driver  | Resolution | Max SPI Freq | Display Inv |
+| ------- | ---------- | ------------ | ----------- |
+| ST7789  | 240x320    | 20M          | True        |
+| ILI9341 | 240x320    | 40M          | False       |
 
 ## ST7789
 
@@ -44,7 +47,7 @@ https://www.aliexpress.com/item/1005004343881408.html
 | SDI/MOSI | orange    | 23         |
 | DC       | green     | 27         |
 | RESET    | brown     | 33         |
-| CS       | white     | 25 ???     |
+| CS       | white     | 14 or 25   |
 | GRN      | black     |            |
 | VCC      | red       | 3.3v or 5v |
 

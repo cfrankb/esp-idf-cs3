@@ -150,11 +150,20 @@ menu "TFT Configuration"
 			On the ESP32, GPIOs 35-39 are input-only so cannot be used as outputs.
 			On the ESP32-S2, GPIO 46 is input-only so cannot be used as outputs.
 
-	config INVERSION
-		bool "Enable Display Inversion"
-		default false
+	choice INVERSION
+		prompt "Enable Display Inversion"
+		default INVERSION_FALSE
 		help
 			Enable Display Inversion.
+		config INVERSION_TRUE
+			bool "TRUE"
+			help
+				Inverse Colors
+		config INVERSION_FALSE
+			bool "FALSE"
+			help
+				Dont't Inverse Colors
+	endchoice
 
 	choice SPI_HOST
 		prompt "SPI peripheral that controls this bus"

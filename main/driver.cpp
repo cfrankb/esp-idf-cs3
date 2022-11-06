@@ -181,17 +181,21 @@ bool spi_master_write_color(TFT_t *dev, uint16_t color, uint16_t size)
 }
 
 // Add 202001
-bool spi_master_write_colors(TFT_t *dev, uint16_t *colors, uint16_t size)
+bool spi_master_write_colors(TFT_t *dev, uint16_t *colors, uint16_t size, bool copyBytes)
 {
     static uint8_t Byte[1024];
-    int index = 0;
-    for (int i = 0; i < size; i++)
+    uint8_t *src = copyBytes ? Byte : reinterpret_cast<uint8_t *>(colors);
+    if (copyBytes)
     {
-        Byte[index++] = (colors[i] >> 8) & 0xFF;
-        Byte[index++] = colors[i] & 0xFF;
+        int index = 0;
+        for (int i = 0; i < size; i++)
+        {
+            Byte[index++] = (colors[i] >> 8) & 0xFF;
+            Byte[index++] = colors[i] & 0xFF;
+        }
     }
     gpio_set_level(dev->_dc, SPI_Data_Mode);
-    return spi_master_write_byte(dev->_SPIHandle, Byte, size * 2);
+    return spi_master_write_byte(dev->_SPIHandle, src, size * 2);
 }
 
 // Draw multi pixel
@@ -211,12 +215,22 @@ void lcdDrawMultiPixels(TFT_t *dev, uint16_t x, uint16_t y, uint16_t size, uint1
     uint16_t _y1 = y + dev->_offsety;
     uint16_t _y2 = _y1;
 
+    lcdDrawTile(dev, RectXY{_x1, _x2, _y1, _y2}, size, colors, true);
+
     /*   spi_master_write_command(dev, 0x2A); // set column(x) address
        spi_master_write_addr(dev, _x1, _x2);
        spi_master_write_command(dev, 0x2B); // set Page(y) address
        spi_master_write_addr(dev, _y1, _y2);
        spi_master_write_command(dev, 0x2C); //	Memory Write
        spi_master_write_colors(dev, colors, size);*/
+}
+
+void lcdDrawTile(TFT_t *dev, RectXY rect, uint16_t size, uint16_t *colors, bool copyBytes)
+{
+    uint16_t _x1 = rect.x1;
+    uint16_t _x2 = rect.x2;
+    uint16_t _y1 = rect.y1;
+    uint16_t _y2 = rect.y2;
 
     if (dev->_model == 0x9340 ||
         dev->_model == 0x9341 ||
@@ -228,7 +242,7 @@ void lcdDrawMultiPixels(TFT_t *dev, uint16_t x, uint16_t y, uint16_t size, uint1
         spi_master_write_comm_byte(dev, 0x2B); // set Page(y) address
         spi_master_write_addr(dev, _y1, _y2);
         spi_master_write_comm_byte(dev, 0x2C); // Memory Write
-        spi_master_write_colors(dev, colors, size);
+        spi_master_write_colors(dev, colors, size, copyBytes);
     } // endif 0x9340/0x9341/0x7789/0x7796
 
     if (dev->_model == 0x7735)
@@ -240,7 +254,7 @@ void lcdDrawMultiPixels(TFT_t *dev, uint16_t x, uint16_t y, uint16_t size, uint1
         spi_master_write_data_word(dev, _y1);
         spi_master_write_data_word(dev, _y2);
         spi_master_write_comm_byte(dev, 0x2C); // Memory Write
-        spi_master_write_colors(dev, colors, size);
+        spi_master_write_colors(dev, colors, size, copyBytes);
     } // 0x7735
 
     if (dev->_model == 0x9225)
@@ -250,7 +264,7 @@ void lcdDrawMultiPixels(TFT_t *dev, uint16_t x, uint16_t y, uint16_t size, uint1
             lcdWriteRegisterByte(dev, 0x20, _x1);
             lcdWriteRegisterByte(dev, 0x21, j);
             spi_master_write_comm_byte(dev, 0x22); // Memory Write
-            spi_master_write_colors(dev, colors, size);
+            spi_master_write_colors(dev, colors, size, copyBytes);
         }
     } // endif 0x9225
 
@@ -265,7 +279,7 @@ void lcdDrawMultiPixels(TFT_t *dev, uint16_t x, uint16_t y, uint16_t size, uint1
             lcdWriteRegisterByte(dev, 0x20, j);
             lcdWriteRegisterByte(dev, 0x21, _y1);
             spi_master_write_comm_byte(dev, 0x22);
-            spi_master_write_colors(dev, colors, size);
+            spi_master_write_colors(dev, colors, size, copyBytes);
         }
     } // endif 0x9226
 }
@@ -431,6 +445,11 @@ void lcdInit(TFT_t *dev, u_int16_t model, int width, int height, int offsetx, in
 
     if (dev->_model == 0x7789)
     {
+        if (dev->_model == 0x7789)
+            ESP_LOGI(TAG, "Your TFT is ST7789");
+        ESP_LOGI(TAG, "Screen width:%d", width);
+        ESP_LOGI(TAG, "Screen height:%d", height);
+
         spi_master_write_command(dev, 0x01); // Software Reset
         delayMS(150);
 

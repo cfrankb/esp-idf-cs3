@@ -18,6 +18,7 @@
 
 #define elif else if
 #define TILESIZE 16
+#define __SPEED_TEST__
 
 CFont font;
 CMap map(30, 30);
@@ -224,7 +225,9 @@ void CGame::drawScreen()
 {
     std::lock_guard<std::mutex> lk(g_mutex);
 
-    //    int64_t t0 = esp_timer_get_time();
+#ifdef __SPEED_TEST__
+    int64_t t0 = esp_timer_get_time();
+#endif
     const int cols = CONFIG_WIDTH / TILESIZE;
     const int rows = CONFIG_HEIGHT / TILESIZE;
     const int lmx = std::max(0, m_player.getX() - cols / 2);
@@ -276,8 +279,10 @@ void CGame::drawScreen()
         display.drawBuffer(0, y * TILESIZE, buffer);
     }
 
-    // int64_t t1 = esp_timer_get_time();
-    //  printf("time: %ld\n", (long)(t1 - t0) / 1000);
+#ifdef __SPEED_TEST__
+    int64_t t1 = esp_timer_get_time();
+    printf("time: %ld\n", (long)(t1 - t0) / 1000);
+#endif
 }
 
 bool CGame::findMonsters()
