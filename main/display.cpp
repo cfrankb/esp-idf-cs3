@@ -272,20 +272,6 @@ void lcdInit(TFT_t *dev, int width, int height, int offsetx, int offsety)
     }
 }
 
-bool initDisplay()
-{
-    TFT_t dev;
-    spi_master_init(&dev, (gpio_num_t)CONFIG_MOSI_GPIO, (gpio_num_t)CONFIG_SCLK_GPIO, (gpio_num_t)CONFIG_CS_GPIO, (gpio_num_t)CONFIG_DC_GPIO, (gpio_num_t)CONFIG_RESET_GPIO, (gpio_num_t)CONFIG_BL_GPIO);
-    lcdInit(&dev, CONFIG_WIDTH, CONFIG_HEIGHT, CONFIG_OFFSETX, CONFIG_OFFSETY);
-
-    lcdFillScreen(&dev, BLACK);
-
-    ESP_LOGI(TAG, "Disable Display Inversion");
-    lcdInversionOff(&dev);
-
-    return true;
-}
-
 // Backlight OFF
 void lcdBacklightOff(TFT_t *dev)
 {
@@ -381,6 +367,29 @@ bool CDisplay::init()
 {
     // TFT_t dev;
     spi_master_init(&m_dev, (gpio_num_t)CONFIG_MOSI_GPIO, (gpio_num_t)CONFIG_SCLK_GPIO, (gpio_num_t)CONFIG_CS_GPIO, (gpio_num_t)CONFIG_DC_GPIO, (gpio_num_t)CONFIG_RESET_GPIO, (gpio_num_t)CONFIG_BL_GPIO);
+
+#if CONFIG_ILI9225
+    uint16_t model = 0x9225;
+#endif
+#if CONFIG_ILI9225G
+    uint16_t model = 0x9226;
+#endif
+#if CONFIG_ILI9340
+    uint16_t model = 0x9340;
+#endif
+#if CONFIG_ILI9341
+    uint16_t model = 0x9341;
+#endif
+#if CONFIG_ST7735
+    uint16_t model = 0x7735;
+#endif
+#if CONFIG_ST7796
+    uint16_t model = 0x7796;
+#endif
+#if CONFIG_ST7789
+    uint16_t model = 0x7789;
+#endif
+
     lcdInit(&m_dev, CONFIG_WIDTH, CONFIG_HEIGHT, CONFIG_OFFSETX, CONFIG_OFFSETY);
 
     ESP_LOGI(TAG, "Disable Display Inversion");
@@ -410,9 +419,6 @@ bool CDisplay::test()
         }
     }
 
-    // lcdDrawMultiPixels(&m_dev, 0, 30, 256, )
-
-    // lcdDrawMultiPixels(TFT_t *dev, uint16_t x, uint16_t y, uint16_t size, uint16_t *colors)
     return true;
 }
 
@@ -465,7 +471,7 @@ bool CDisplay::drawTile(uint16_t x, uint16_t y, uint16_t *tile, int mode)
     return true;
 }
 
-bool CDisplay::drawBuffer(uint16_t x, uint16_t y, CBuffer &buffer, int mode)
+bool CDisplay::drawBuffer(uint16_t x, uint16_t y, CBuffer &buffer)
 {
     TFT_t *dev = &m_dev;
     int len;
@@ -473,17 +479,14 @@ bool CDisplay::drawBuffer(uint16_t x, uint16_t y, CBuffer &buffer, int mode)
     int size;
     uint16_t _x1, _x2, _y1, _y2;
 
-    switch (mode)
+    uint16_t *data = buffer.start(len, hei);
+    while (data)
     {
-    case 0:
-        len = buffer.len();
-        hei = 8; // buffer.hei();
         size = len * hei;
         --len;
-
         if (x + len > dev->_width)
             return false;
-        if (y + hei >= dev->_height)
+        if (y + hei > dev->_height)
             return false;
 
         _x1 = x + dev->_offsetx;
@@ -496,38 +499,11 @@ bool CDisplay::drawBuffer(uint16_t x, uint16_t y, CBuffer &buffer, int mode)
         spi_master_write_command(dev, 0x2B); // set Page(y) address
         spi_master_write_addr(dev, _y1, _y2);
         spi_master_write_command(dev, 0x2C); //	Memory Write
-                                             // spi_master_write_colors(dev, tile, size);
         gpio_set_level(dev->_dc, SPI_Data_Mode);
-        spi_master_write_byte(dev->_SPIHandle, reinterpret_cast<uint8_t *>(buffer.buffer()), size * 2);
-        break;
-
-    case 1:
-        uint16_t *data = buffer.start(len, hei);
-        while (data)
-        {
-            size = len * hei;
-            --len;
-            if (x + len > dev->_width)
-                return false;
-            if (y + hei > dev->_height)
-                return false;
-
-            _x1 = x + dev->_offsetx;
-            _x2 = _x1 + len;
-            _y1 = y + dev->_offsety;
-            _y2 = _y1 + hei;
-
-            spi_master_write_command(dev, 0x2A); // set column(x) address
-            spi_master_write_addr(dev, _x1, _x2);
-            spi_master_write_command(dev, 0x2B); // set Page(y) address
-            spi_master_write_addr(dev, _y1, _y2);
-            spi_master_write_command(dev, 0x2C); //	Memory Write
-            gpio_set_level(dev->_dc, SPI_Data_Mode);
-            //  printf("DMA USED: %p  len: %d, hei:%d\n", data, len, hei);
-            spi_master_write_byte(dev->_SPIHandle, reinterpret_cast<uint8_t *>(data), size * 2);
-            y += hei;
-            data = buffer.next(len, hei);
-        }
+        //  printf("DMA USED: %p  len: %d, hei:%d\n", data, len, hei);
+        spi_master_write_byte(dev->_SPIHandle, reinterpret_cast<uint8_t *>(data), size * 2);
+        y += hei;
+        data = buffer.next(len, hei);
     }
     return true;
 }

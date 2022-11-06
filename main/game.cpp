@@ -217,7 +217,7 @@ void CGame::drawLevelIntro()
     display.clear(BLACK);
     buffer.fill(BLACK);
     buffer.drawFont(x, 0, font, t, WHITE);
-    display.drawBuffer(0, y, buffer, 1);
+    display.drawBuffer(0, y, buffer);
 }
 
 void CGame::drawScreen()
@@ -273,7 +273,7 @@ void CGame::drawScreen()
             buffer.drawRect(
                 Rect{.x = 4, .y = 4, .width = std::min(m_health / 2, CONFIG_WIDTH - 4), .height = 8}, LIME);
         }
-        display.drawBuffer(0, y * TILESIZE, buffer, 1);
+        display.drawBuffer(0, y * TILESIZE, buffer);
     }
 
     // int64_t t1 = esp_timer_get_time();

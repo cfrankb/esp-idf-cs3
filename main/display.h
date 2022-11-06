@@ -38,7 +38,7 @@ public:
     bool init();
     bool test();
     bool drawTile(uint16_t x, uint16_t y, uint16_t *tile, int mode);
-    bool drawBuffer(uint16_t x, uint16_t y, CBuffer &buffer, int mode);
+    bool drawBuffer(uint16_t x, uint16_t y, CBuffer &buffer);
     bool clear(const uint8_t color);
     TFT_t *dev();
 

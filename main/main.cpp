@@ -21,61 +21,8 @@
 #include "game.h"
 
 // static const char *TAG = "main";
-const int cols = CONFIG_WIDTH / 16;
-const int rows = CONFIG_HEIGHT / 16;
 
 CGame game;
-
-void randomMap(CMap &map, CTileSet &tiles)
-{
-    for (int y = 0; y < map.hei(); ++y)
-    {
-        for (int x = 0; x < map.len(); ++x)
-        {
-            uint8_t i = esp_random() % tiles.size();
-            map.set(x, y, i);
-        }
-    }
-}
-
-void testTiles(CDisplay &display, CTileSet &tiles)
-{
-    CMap map(cols, rows);
-    randomMap(map, tiles);
-    int64_t t0 = esp_timer_get_time();
-    for (int y = 0; y < rows; ++y)
-    {
-        for (int x = 0; x < cols; ++x)
-        {
-            int i = map.at(x, y);
-            display.drawTile(x * 16, y * 16, tiles[i], 1);
-        }
-    }
-
-    int64_t t1 = esp_timer_get_time();
-
-    printf("time: %ld\n", (long)(t1 - t0) / 1000);
-}
-
-void testTiles(CDisplay &display, CTileSet &tiles, CMap &map, CBuffer &buffer, int mx, int my)
-{
-    int64_t t0 = esp_timer_get_time();
-
-    for (int y = 0; y < rows; ++y)
-    {
-        for (int x = 0; x < cols; ++x)
-        {
-            int i = map.at(x + mx, y + my);
-            buffer.drawTile(x * 16, 0, tiles[i]);
-        }
-
-        display.drawBuffer(0, y * 16, buffer, 1);
-    }
-
-    int64_t t1 = esp_timer_get_time();
-
-    printf("time: %ld\n", (long)(t1 - t0) / 1000);
-}
 
 void drawScreenTask(void *pvParameter)
 {
