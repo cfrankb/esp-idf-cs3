@@ -386,7 +386,7 @@ bool CDisplay::init()
     ESP_LOGI(TAG, "Disable Display Inversion");
     lcdInversionOff(&m_dev);
 
-    lcdFillScreen(&m_dev, RED);
+    lcdFillScreen(&m_dev, BLACK);
 
     return true;
 }
@@ -529,5 +529,11 @@ bool CDisplay::drawBuffer(uint16_t x, uint16_t y, CBuffer &buffer, int mode)
             data = buffer.next(len, hei);
         }
     }
+    return true;
+}
+
+bool CDisplay::clear(const uint8_t color)
+{
+    lcdFillScreen(&m_dev, color);
     return true;
 }

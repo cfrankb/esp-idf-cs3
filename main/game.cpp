@@ -1,5 +1,6 @@
 #include <cstring>
 #include <mutex>
+#include <string>
 #include "game.h"
 #include "display.h"
 #include "esphelpers.h"
@@ -155,29 +156,27 @@ bool CGame::init()
 void CGame::nextLevel()
 {
     printf("nextLevel\n");
-    m_score += 500;
+    m_score += 500 + m_health;
     ++m_level;
     loadLevel();
 }
 
 bool CGame::loadLevel()
 {
-    printf("load level:%d\n", m_level + 1);
+    printf("loading level: %d ...\n", m_level + 1);
     std::lock_guard<std::mutex> lk(g_mutex);
+    setMode(MODE_INTRO);
 
-    char fname[64];
-    sprintf(fname, "/spiffs/level%.2d.cs3", m_level + 1);
-    if (!convertCs3Level(map, fname))
+    char target[20];
+    char fpath[64];
+    // sprintf(fname, "/spiffs/level%.2d.map", m_level + 1);
+    sprintf(target, "level%.2d", m_level + 1);
+    std::string fname = findLevel(target);
+    sprintf(fpath, "/spiffs/%s", fname.c_str());
+    if (!fetchLevel(map, fpath))
     {
         return false;
     }
-    /*
-    sprintf(fname, "/spiffs/level%.2d.map", m_level + 1);
-    if (!processLevel(map, fname))
-    {
-        return false;
-    }*/
-
     printf("level loaded\n");
 
     memset(tileReplacement, NO_ANIMZ, sizeof(tileReplacement));
@@ -192,6 +191,7 @@ bool CGame::loadLevel()
     m_health = DEFAULT_HEALTH;
 
     findMonsters();
+
     return true;
 }
 
@@ -205,6 +205,19 @@ void CGame::animate()
         ++seq.index;
         seq.index = seq.index % seq.count;
     }
+}
+
+void CGame::drawLevelIntro()
+{
+    char t[32];
+    sprintf(t, "LEVEL %.2d", m_level + 1);
+
+    int x = (CONFIG_WIDTH - strlen(t) * 8) / 2;
+    int y = (CONFIG_HEIGHT - 8) / 2;
+    display.clear(BLACK);
+    buffer.fill(BLACK);
+    buffer.drawFont(x, 0, font, t, WHITE);
+    display.drawBuffer(0, y, buffer, 1);
 }
 
 void CGame::drawScreen()
@@ -497,3 +510,13 @@ void CGame::addHealth(int hp)
         m_health = std::max(m_health + hp, 0);
     }
 }
+
+void CGame::setMode(int mode)
+{
+    m_mode = mode;
+}
+
+int CGame::mode() const
+{
+    return m_mode;
+};

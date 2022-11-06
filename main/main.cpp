@@ -81,7 +81,17 @@ void drawScreenTask(void *pvParameter)
 {
     while (1)
     {
-        game.drawScreen();
+        switch (game.mode())
+        {
+        case CGame::MODE_INTRO:
+            game.drawLevelIntro();
+            vTaskDelay(2000 / portTICK_RATE_MS);
+            game.setMode(CGame::MODE_LEVEL);
+            break;
+        case CGame::MODE_LEVEL:
+            game.drawScreen();
+        }
+
         vTaskDelay(20 / portTICK_RATE_MS);
     }
 }
@@ -99,6 +109,7 @@ extern "C" void app_main(void)
     printf("%d\n", xReturned);
 
     int ticks = 0;
+
     while (1)
     {
         vTaskDelay(40 / portTICK_RATE_MS);

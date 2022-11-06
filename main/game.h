@@ -15,6 +15,7 @@ public:
     bool init();
     bool loadLevel();
     void drawScreen();
+    void drawLevelIntro();
     bool move(int dir);
     void manageMonsters();
     void managePlayer();
@@ -27,6 +28,14 @@ public:
 
     static CMap &getMap();
     void nextLevel();
+    void setMode(int mode);
+    int mode() const;
+
+    enum
+    {
+        MODE_INTRO = 0,
+        MODE_LEVEL = 1
+    };
 
 protected:
     int m_health = 0;
@@ -47,6 +56,8 @@ protected:
         MAX_HEALTH = 255,
         DEFAULT_HEALTH = 64,
     };
+
+    int m_mode;
 
     CActor *m_monsters;
     int m_monsterCount;

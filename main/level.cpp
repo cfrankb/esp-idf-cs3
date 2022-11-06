@@ -1,5 +1,6 @@
 #include <cstring>
 #include <stdio.h>
+#include <dirent.h>
 #include "level.h"
 #include "map.h"
 #include "tilesdata.h"
@@ -238,4 +239,52 @@ bool convertCs3Level(CMap &map, const char *fname)
 
     delete[] data;
     return true;
+}
+
+bool fetchLevel(CMap &map, const char *fname)
+{
+    printf("fetch %s\n", fname);
+
+    char *pCs3 = strstr(fname, ".cs3");
+    char *pMap = strstr(fname, ".map");
+    if (pCs3 && memcmp(pCs3, ".cs3", 4) == 0)
+    {
+        printf("level is cs3\n");
+        return convertCs3Level(map, fname);
+    }
+    else if (pMap && memcmp(pMap, ".map", 4) == 0)
+    {
+        printf("level is map\n");
+        return processLevel(map, fname);
+    }
+    else
+    {
+        printf("level is unknown\n");
+        return false;
+    }
+}
+
+std::string findLevel(const char *target)
+{
+    DIR *dir;
+    char *fname = nullptr;
+
+    struct dirent *diread;
+    if ((dir = opendir("/spiffs")) != nullptr)
+    {
+        while ((diread = readdir(dir)) != nullptr)
+        {
+            if (strstr(diread->d_name, target))
+            {
+                fname = diread->d_name;
+                break;
+            }
+        }
+        closedir(dir);
+    }
+    else
+    {
+        perror("opendir");
+    }
+    return std::string(fname);
 }
