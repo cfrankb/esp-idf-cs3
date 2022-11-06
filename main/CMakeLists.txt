@@ -12,11 +12,12 @@ set(SOURCES
     actor.cpp
     font.cpp
     colors.cpp
+    driver.cpp
 )
 
 idf_component_register(
     SRCS ${SOURCES}
-    #SRCS "level.cpp" "font.cpp" "game.cpp" "actor.cpp" "tilesdata.cpp" "buffer.cpp" "map.cpp" "joystick.cpp" "display.cpp" "tileset.cpp" "st7789.c" "esphelpers.cpp" "main.cpp" "vlamits_esp32.c"
+    #SRCS "driver.cpp" "level.cpp" "font.cpp" "game.cpp" "actor.cpp" "tilesdata.cpp" "buffer.cpp" "map.cpp" "joystick.cpp" "display.cpp" "tileset.cpp" "st7789.c" "esphelpers.cpp" "main.cpp" "vlamits_esp32.c"
     INCLUDE_DIRS "."
 )
 

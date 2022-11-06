@@ -1,4 +1,4 @@
-menu "ST7789 Configuration"
+menu "TFT Configuration"
 
 	config GPIO_RANGE_MAX
 		int
@@ -6,6 +6,41 @@ menu "ST7789 Configuration"
 		default 46 if IDF_TARGET_ESP32S2
 		default 19 if IDF_TARGET_ESP32C3
 		default 48 if IDF_TARGET_ESP32S3
+
+	choice DRIVER
+		prompt "Display Driver"
+		default ILI9341
+		help
+			Select Display Driver.
+		config ILI9225
+			bool "ILI9225"
+			help
+				Display Driver is ILI9225.
+		config ILI9225G
+			bool "ILI9225G"
+			help
+				Display Driver is ILI9225G.
+		config ILI9340
+			bool "ILI9340"
+			help
+				Display Driver is ILI9340.
+		config ILI9341
+			bool "ILI9341"
+			help
+				Display Driver is ILI9341.
+		config ST7735
+			bool "ST7735"
+			help
+				Display Driver is ST7735.
+		config ST7789
+			bool "ST7789"
+			help
+				Display Driver is ST7789.
+		config ST7796
+			bool "ST7796"
+			help
+				Display Driver is ST7796S.
+	endchoice
 
 	config WIDTH
 		int "SCREEN WIDTH"

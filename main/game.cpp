@@ -214,7 +214,7 @@ void CGame::drawLevelIntro()
 
     int x = (CONFIG_WIDTH - strlen(t) * 8) / 2;
     int y = (CONFIG_HEIGHT - 8) / 2;
-    display.clear(BLACK);
+    display.fill(BLACK);
     buffer.fill(BLACK);
     buffer.drawFont(x, 0, font, t, WHITE);
     display.drawBuffer(0, y, buffer);
