@@ -12,6 +12,10 @@ Current status is alpha. 90% of the core mechanic has been implemented.
 
 ![Image](images/20221103_155303-50.jpg 'icon')
 
+I am also releasing the source code for the map editor:
+https://github.com/cfrankb/cs3-map-edit
+
+
 # Software required
 
 esp-idf v4.4 or later.
