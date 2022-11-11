@@ -1,6 +1,7 @@
 #include "map.h"
 #include <cstring>
 #include <cstdio>
+#include <algorithm>
 
 static const char SIG[] = "MAPZ";
 static const uint16_t VERSION = 0;
@@ -56,6 +57,7 @@ void CMap::forget()
     }
     m_len = 0;
     m_hei = 0;
+    m_size = 0;
 }
 
 bool CMap::read(const char *fname)
@@ -88,23 +90,36 @@ bool CMap::read(FILE *sfile)
         fread(sig, strlen(SIG), 1, sfile);
         if (memcmp(sig, SIG, strlen(SIG)) != 0)
         {
-            printf("signature mismatch\n");
+            m_lastError = "signature mismatch";
+            printf("%s\n", m_lastError.c_str());
             return false;
         }
         uint16_t ver;
         fread(&ver, sizeof(VERSION), 1, sfile);
         if (ver > VERSION)
         {
-            printf("bad version\n");
+            m_lastError = "bad version";
+            printf("%s\n", m_lastError.c_str());
             return false;
         }
         uint8_t len;
         uint8_t hei;
         fread(&len, sizeof(len), 1, sfile);
         fread(&hei, sizeof(hei), 1, sfile);
-        resize(len, hei);
+        resize(len, hei, true);
         fread(m_map, len * hei, 1, sfile);
         m_attrs.clear();
+        uint16_t attrCount = 0;
+        fread(&attrCount, sizeof(attrCount), 1, sfile);
+        for (int i=0; i < attrCount; ++i) {
+            uint8_t x;
+            uint8_t y;
+            uint8_t a;
+            fread(&x, sizeof(x), 1, sfile);
+            fread(&y, sizeof(y), 1, sfile);
+            fread(&a, sizeof(a), 1, sfile);
+            setAttr(x,y,a);
+        }
     }
     return sfile != nullptr;
 }
@@ -118,6 +133,17 @@ bool CMap::write(FILE *tfile)
         fwrite(&m_len, sizeof(uint8_t), 1, tfile);
         fwrite(&m_hei, sizeof(uint8_t), 1, tfile);
         fwrite(m_map, m_len * m_hei, 1, tfile);
+        uint16_t attrCount =  m_attrs.size();
+        fwrite(&attrCount, sizeof(attrCount), 1, tfile);
+        for (auto& it: m_attrs) {
+            uint16_t key = it.first;
+            uint8_t x = key & 0xff;
+            uint8_t y = key >> 8;
+            uint8_t a = it.second;
+            fwrite(&x, sizeof(x), 1, tfile);
+            fwrite(&y, sizeof(y), 1, tfile);
+            fwrite(&a, sizeof(a), 1, tfile);
+        }
     }
     return tfile != nullptr;
 }
@@ -131,22 +157,36 @@ int CMap::hei() const
     return m_hei;
 }
 
-bool CMap::resize(int len, int hei)
+bool CMap::resize(int len, int hei, bool fast)
 {
-    if (len * hei > m_size)
-    {
-        forget();
-        m_map = new uint8_t[len * hei];
-        if (m_map == nullptr)
+    if (fast) {
+        if (len * hei > m_size)
         {
-            printf("resize fail\n");
-            return false;
+            forget();
+            m_map = new uint8_t[len * hei];
+            if (m_map == nullptr)
+            {
+                m_lastError = "resize fail";
+                printf("%s\n", m_lastError.c_str());
+                return false;
+            }
+            m_size = len * hei;
         }
+        m_attrs.clear();
+    } else {
+        uint8_t * newMap = new uint8_t[len * hei];
+        memset(newMap, 0, len * hei * sizeof(newMap[0]));
+        for (int y=0; y < hei; ++y) {
+            memcpy(newMap + y * len,
+                   m_map + y * m_len,
+                   std::min(static_cast<uint8_t>(len), m_len));
+        }
+        delete [] m_map;
+        m_map = newMap;
         m_size = len * hei;
     }
     m_len = len;
     m_hei = hei;
-    m_attrs.clear();
     return true;
 }
 
@@ -196,7 +236,7 @@ void CMap::clear(uint8_t ch)
 uint8_t CMap::getAttr(const uint8_t x, const uint8_t y)
 {
     const uint16_t key = x + (y << 8);
-    if (m_attrs.count(key) != 0)
+    if (m_attrs.size() > 0 && m_attrs.count(key) != 0)
     {
         return m_attrs[key];
     }
@@ -216,4 +256,25 @@ void CMap::setAttr(const uint8_t x, const uint8_t y, const uint8_t a)
     {
         m_attrs[key] = a;
     }
+}
+
+const char *CMap::lastError()
+{
+    return m_lastError.c_str();
+}
+
+int CMap::size() {
+    return m_size;
+}
+
+CMap & CMap::operator=(const CMap map)
+{
+    forget();
+    m_len = map.m_len;
+    m_hei = map.m_hei;
+    m_map = new uint8_t[m_len * m_hei];
+    memcpy(m_map, map.m_map, sizeof(m_map[0]) * map.m_len*map.m_hei);
+    m_attrs = map.m_attrs;
+    m_size = map.m_len*map.m_hei;
+    return *this;
 }

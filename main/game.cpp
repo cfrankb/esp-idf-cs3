@@ -174,7 +174,8 @@ bool CGame::loadLevel()
     sprintf(target, "level%.2d", m_level + 1);
     std::string fname = findLevel(target);
     sprintf(fpath, "/spiffs/%s", fname.c_str());
-    if (!fetchLevel(map, fpath))
+    std::string error;
+    if (!fetchLevel(map, fpath, error))
     {
         return false;
     }

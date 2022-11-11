@@ -25,7 +25,7 @@ std::string str2upper(const std::string in)
 void splitString(const std::string str, StringVector &list)
 {
     int i = 0;
-    int j = 0;
+    unsigned int j = 0;
     while (j < str.length())
     {
         if (isspace(str[j]))
@@ -74,7 +74,7 @@ bool getChMap(const char *mapFile, char *chMap)
     }
 
     char *p = reinterpret_cast<char *>(data);
-    printf("parsing tiles.map: %d\n", strlen(p));
+    printf("parsing tiles.map: %zull\n", strlen(p));
     int i = 0;
 
     while (p && *p)
@@ -128,7 +128,7 @@ bool processLevel(CMap &map, const char *fname)
     }
     printf("maxRows: %d, maxCols:%d\n", maxRows, maxCols);
 
-    map.resize(maxCols, maxRows);
+    map.resize(maxCols, maxRows, true);
     map.clear();
 
     // convert ascii to map
@@ -208,7 +208,11 @@ const uint16_t convTable[] = {
     TILES_DIAMOND + 0x500,
     TILES_BLANK + 0x500,
     TILES_DIAMOND + 0x600,
-    TILES_BLANK + 0x600,
+    TILES_BLANK + 0x600, // 0x31
+    TILES_BLANK,         // 0x32
+    TILES_BLANK,         // 0x33
+    TILES_BLANK,         // 0x34
+    TILES_YAHOO,         // 0x35
 };
 
 bool convertCs3Level(CMap &map, const char *fname)
@@ -221,16 +225,21 @@ bool convertCs3Level(CMap &map, const char *fname)
     }
 
     map.clear();
-    map.resize(64, 64);
+    map.resize(64, 64, true);
     uint8_t *p = data + 7;
     for (int y = 0; y < 64; ++y)
     {
         for (int x = 0; x < 64; ++x)
         {
-            const u_int8_t oldTile = *p;
-            const u_int16_t data = convTable[oldTile];
-            const u_int8_t attr = static_cast<u_int8_t>(data >> 8);
-            const u_int8_t tile = static_cast<u_int8_t>(data);
+            uint8_t oldTile = *p;
+            if (oldTile >= sizeof(convTable) / 2)
+            {
+                printf("oldTile: %d", oldTile);
+                oldTile = 0;
+            }
+            const uint16_t data = convTable[oldTile];
+            const uint8_t attr = static_cast<uint8_t>(data >> 8);
+            const uint8_t tile = static_cast<uint8_t>(data & 0xff);
             map.set(x, y, tile);
             map.setAttr(x, y, attr);
             ++p;
@@ -241,27 +250,41 @@ bool convertCs3Level(CMap &map, const char *fname)
     return true;
 }
 
-bool fetchLevel(CMap &map, const char *fname)
+bool fetchLevel(CMap &map, const char *fname, std::string &error)
 {
-    printf("fetch %s\n", fname);
+    char tmp[strlen(fname) + 128];
+    printf("fetching: %s\n", fname);
 
-    char *pCs3 = strstr(fname, ".cs3");
-    char *pMap = strstr(fname, ".map");
-    if (pCs3 && memcmp(pCs3, ".cs3", 4) == 0)
+    FILE *sfile = fopen(fname, "rb");
+    if (!sfile)
     {
+        sprintf(tmp, "can't open file: %s", fname);
+        error = tmp;
+        return false;
+    }
+
+    char sig[4];
+    fread(sig, sizeof(sig), 1, sfile);
+    if (memcmp(sig, "MAPZ", 4) == 0)
+    {
+        fclose(sfile);
+        printf("level is MAPZ\n");
+        return map.read(fname);
+    }
+
+    fseek(sfile, 0, SEEK_END);
+    int size = ftell(sfile);
+    const int cs3LevelSize = 64 * 64 + 7;
+    if (size == cs3LevelSize)
+    {
+        fclose(sfile);
         printf("level is cs3\n");
         return convertCs3Level(map, fname);
     }
-    else if (pMap && memcmp(pMap, ".map", 4) == 0)
-    {
-        printf("level is map\n");
-        return processLevel(map, fname);
-    }
-    else
-    {
-        printf("level is unknown\n");
-        return false;
-    }
+
+    fclose(sfile);
+    printf("level is map\n");
+    return processLevel(map, fname);
 }
 
 std::string findLevel(const char *target)
@@ -286,5 +309,5 @@ std::string findLevel(const char *target)
     {
         perror("opendir");
     }
-    return std::string(fname);
+    return std::string(fname ? fname : "");
 }

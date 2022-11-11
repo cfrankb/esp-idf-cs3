@@ -5,123 +5,123 @@
 #include "sprtypes.h"
 
 const TileDef tileDefs[]={
-    {0x20, TYPE_BACKGROUND, 0, 0}, // 00 TILES_BLANK
-    {0x73, TYPE_STOP, 0, 0}, // 01 TILES_STOP
-    {0x50, TYPE_PLAYER, 0, 0}, // 02 TILES_ANNIE2
-    {0x23, TYPE_WALLS, 0, 0}, // 03 TILES_WALLS93
-    {0x25, TYPE_WALLS, 0, 0}, // 04 TILES_WALLS93_2
-    {0x3d, TYPE_WALLS, 0, 0}, // 05 TILES_WALLS93_3
-    {0x22, TYPE_WALLS, 0, 0}, // 06 TILES_WALLS93_4
-    {0x00, TYPE_WALLS, 0, 0}, // 07 TILES_WALLS93_5
-    {0x00, TYPE_WALLS, 0, 0}, // 08 TILES_WALLS93_6
-    {0x00, TYPE_WALLS, 0, 0}, // 09 TILES_WALLS93_7
-    {0x2e, TYPE_WALLS, 0, 0}, // 0a TILES_ROCK1
-    {0x2c, TYPE_WALLS, 0, 0}, // 0b TILES_ROCK2
-    {0x3b, TYPE_WALLS, 0, 0}, // 0c TILES_ROCK3
-    {0x58, TYPE_WALLS, 0, 0}, // 0d TILES_WALL_BRICK
-    {0x57, TYPE_WALLS, 0, 0}, // 0e TILES_WALL_BRICK_2
-    {0x51, TYPE_WALLS, 0, 0}, // 0f TILES_WALL_BRICK_3
-    {0x5a, TYPE_WALLS, 0, 0}, // 10 TILES_WALL_BRICK_4
-    {0x4b, TYPE_WALLS, 0, 0}, // 11 TILES_WALL_BRICK_5
-    {0x55, TYPE_WALLS, 0, 0}, // 12 TILES_WALL_BRICK_6
-    {0x00, TYPE_WALLS, 0, 0}, // 13 TILES_WALL_BRICK_7
-    {0x00, TYPE_WALLS, 0, 0}, // 14 TILES_COLORWALLS
-    {0x00, TYPE_WALLS, 0, 0}, // 15 TILES_COLORWALLS_2
-    {0x00, TYPE_WALLS, 0, 0}, // 16 TILES_COLORWALLS_3
-    {0x00, TYPE_WALLS, 0, 0}, // 17 TILES_COLORWALLS_4
-    {0x00, TYPE_WALLS, 0, 0}, // 18 TILES_COLORWALLS_5
-    {0x00, TYPE_WALLS, 0, 0}, // 19 TILES_COLORWALLS_6
-    {0x00, TYPE_WALLS, 0, 0}, // 1a TILES_COLORWALLS_7
-    {0x00, TYPE_WALLS, 0, 0}, // 1b TILES_COLORWALLS_8
-    {0x00, TYPE_WALLS, 0, 0}, // 1c TILES_COLORWALLS_9
-    {0x00, TYPE_WALLS, 0, 0}, // 1d TILES_COLORWALLS_A
-    {0x00, TYPE_WALLS, 0, 0}, // 1e TILES_COLORWALLS_B
-    {0x00, TYPE_WALLS, 0, 0}, // 1f TILES_COLORWALLS_C
-    {0x00, TYPE_WALLS, 0, 0}, // 20 TILES_COLORWALLS_D
-    {0x00, TYPE_WALLS, 0, 0}, // 21 TILES_COLORWALLS_E
-    {0x00, TYPE_WALLS, 0, 0}, // 22 TILES_COLORWALLS_F
-    {0x00, TYPE_WALLS, 0, 0}, // 23 TILES_COLORWALLS_10
-    {0x70, TYPE_WALLS, 0, 0}, // 24 TILES_PINETREE
-    {0x00, TYPE_BACKGROUND, 0, 0}, // 25 TILES_PLANTS
-    {0x00, TYPE_BACKGROUND, 0, 0}, // 26 TILES_PLANTS_2
-    {0x00, TYPE_BACKGROUND, 0, 0}, // 27 TILES_PLANTS_3
-    {0x00, TYPE_BACKGROUND, 0, 0}, // 28 TILES_PLANTS_4
-    {0x00, TYPE_BACKGROUND, 0, 0}, // 29 TILES_PLANTS_5
-    {0x00, TYPE_BACKGROUND, 0, 0}, // 2a TILES_PLANTS_6
-    {0x00, TYPE_BACKGROUND, 0, 0}, // 2b TILES_PLANTS_7
-    {0x3c, TYPE_WALLS, 0, 0}, // 2c TILES_THISWAY
-    {0x3e, TYPE_WALLS, 0, 0}, // 2d TILES_THISWAY_2
-    {0x26, TYPE_PICKUP, 3, 0}, // 2e TILES_FRUIT1
-    {0x21, TYPE_PICKUP, 15, 8}, // 2f TILES_NECKLESS
-    {0x61, TYPE_PICKUP, 20, 0}, // 30 TILES_APPLE
-    {0x62, TYPE_PICKUP, 12, 0}, // 31 TILES_BOOK
-    {0x42, TYPE_PICKUP, 30, 0}, // 32 TILES_BALLON1
-    {0x63, TYPE_PICKUP, 5, 0}, // 33 TILES_CAROTTE
-    {0x43, TYPE_PICKUP, 5, 0}, // 34 TILES_CAROTTE_2
-    {0x47, TYPE_PICKUP, 50, 0}, // 35 TILES_CHEST
-    {0x00, TYPE_WALLS, 0, 0}, // 36 TILES_STATUE
-    {0x74, TYPE_WALLS, 0, 0}, // 37 TILES_TOMB
-    {0x6d, TYPE_WALLS, 0, 0}, // 38 TILES_MUSHROOM
-    {0x00, TYPE_PICKUP, 22, 0}, // 39 TILES_SMALL_MUSH
-    {0x00, TYPE_PICKUP, 22, 0}, // 3a TILES_SMALL_MUSH_2
-    {0x00, TYPE_PICKUP, 22, 0}, // 3b TILES_SMALL_MUSH_3
-    {0x00, TYPE_PICKUP, 22, 0}, // 3c TILES_SMALL_MUSH_4
-    {0x5b, TYPE_WALLS, 0, 0}, // 3d TILES_POT
-    {0x5d, TYPE_WALLS, 0, 0}, // 3e TILES_POT_2
-    {0x4a, TYPE_WALLS, 0, 0}, // 3f TILES_JAR1
-    {0x77, TYPE_PICKUP, 16, 0}, // 40 TILES_WATERMEL
-    {0x00, TYPE_WALLS, 0, 0}, // 41 TILES_BOULDER
-    {0x00, TYPE_WALLS, 0, 0}, // 42 TILES_BOULDER_2
-    {0x3f, TYPE_PICKUP, 21, 0}, // 43 TILES_MAGICBOX
-    {0x2a, TYPE_PICKUP, 40, 0}, // 44 TILES_MAGICBOT
-    {0x00, TYPE_PICKUP, 22, 0}, // 45 TILES_LIGHTBUL
-    {0x2b, TYPE_PICKUP, 9, 0}, // 46 TILES_1ST_AID
-    {0x00, TYPE_PICKUP, 27, 0}, // 47 TILES_ROPE
-    {0x53, TYPE_PICKUP, 37, 0}, // 48 TILES_SHIELD
-    {0x6f, TYPE_PICKUP, 44, 0}, // 49 TILES_VIALS
-    {0x00, TYPE_PICKUP, 44, 0}, // 4a TILES_VIALS_2
-    {0x00, TYPE_PICKUP, 44, 0}, // 4b TILES_VIALS_3
-    {0x67, TYPE_PICKUP, 4, 0}, // 4c TILES_POIRE
-    {0x00, TYPE_PICKUP, 45, 0}, // 4d TILES_CLOVER
-    {0x00, TYPE_PICKUP, 32, 0}, // 4e TILES_PUMPKIN
-    {0x40, TYPE_PICKUP, 60, 4}, // 4f TILES_FLOWERS
-    {0x46, TYPE_PICKUP, 60, 4}, // 50 TILES_FLOWERS_2
-    {0x48, TYPE_DOOR, 0, 0}, // 51 TILES_HEARTDOOR
-    {0x68, TYPE_KEY, 50, 0}, // 52 TILES_HEARTKEY
-    {0x00, TYPE_DOOR, 0, 0}, // 53 TILES_GRAYDOOR
-    {0x00, TYPE_KEY, 50, 0}, // 54 TILES_GRAYKEY
-    {0x00, TYPE_DOOR, 0, 0}, // 55 TILES_POPDOOR
-    {0x00, TYPE_KEY, 50, 0}, // 56 TILES_POPKEY
-    {0x52, TYPE_DOOR, 0, 0}, // 57 TILES_REDDOOR
-    {0x72, TYPE_KEY, 50, 0}, // 58 TILES_REDKEY
-    {0x59, TYPE_DOOR, 0, 0}, // 59 TILES_YELDOOR
-    {0x79, TYPE_KEY, 50, 0}, // 5a TILES_YELKEY
-    {0x5e, TYPE_SWAMP, 0, 0}, // 5b TILES_SWAMP
-    {0x24, TYPE_DIAMOND, 10, 6}, // 5c TILES_DIAMOND
-    {0x54, TYPE_PICKUP, 99, 0}, // 5d TILES_TRIFORCE
-    {0x4f, TYPE_PICKUP, 67, 0}, // 5e TILES_ORB
-    {0x00, TYPE_PICKUP, 66, 0}, // 5f TILES_TNTSTICK
-    {0x41, TYPE_MONSTER, 0, 0}, // 60 TILES_ALPHA
-    {0x00, TYPE_MONSTER, 0, 0}, // 61 TILES_BLUEGHOS
-    {0x44, TYPE_MONSTER, 0, 0}, // 62 TILES_DEICO
-    {0x2f, TYPE_WALLS, 0, 0}, // 63 TILES_FORCEF94
-    {0x5f, TYPE_WALLS, 0, 0}, // 64 TILES_FORCEFIH
-    {0x7c, TYPE_WALLS, 0, 0}, // 65 TILES_FORCEFIV
-    {0x69, TYPE_MONSTER, 0, 0}, // 66 TILES_INSECT1
-    {0x6c, TYPE_MONSTER, 0, 0}, // 67 TILES_LUTIN
-    {0x4d, TYPE_MONSTER, 0, 0}, // 68 TILES_MANKA
-    {0x00, TYPE_MONSTER, 0, 0}, // 69 TILES_MAXKILLER
-    {0x00, TYPE_MONSTER, 0, 0}, // 6a TILES_OCTOPUS
-    {0x00, TYPE_MONSTER, 0, 0}, // 6b TILES_OOO
-    {0x00, TYPE_MONSTER, 0, 0}, // 6c TILES_TEDDY93
-    {0x76, TYPE_VAMPLANT, 0, 0}, // 6d TILES_VAMPLANT
-    {0x00, TYPE_MONSTER, 0, 0}, // 6e TILES_YAHOO
-    {0x00, TYPE_MONSTER, 0, 0}, // 6f TILES_YIGA
-    {0x00, TYPE_MONSTER, 0, 0}, // 70 TILES_YELKILLER
-    {0x71, TYPE_DRONE, 0, 0}, // 71 TILES_WHTEWORM
-    {0x00, TYPE_DRONE, 0, 0}, // 72 TILES_ETURTLE
-    {0x00, TYPE_DRONE, 0, 0}, // 73 TILES_DRAGO
-    {0x00, TYPE_DRONE, 0, 0} // 74 TILES_BIRD
+    {0x20, TYPE_BACKGROUND, 0, 0, "blank.obl"}, // 00 TILES_BLANK
+    {0x73, TYPE_STOP, 0, 0, "stop.obl"}, // 01 TILES_STOP
+    {0x50, TYPE_PLAYER, 0, 0, "annie2.obl"}, // 02 TILES_ANNIE2
+    {0x23, TYPE_WALLS, 0, 0, "walls93.obl"}, // 03 TILES_WALLS93
+    {0x25, TYPE_WALLS, 0, 0, "walls93.obl"}, // 04 TILES_WALLS93_2
+    {0x3d, TYPE_WALLS, 0, 0, "walls93.obl"}, // 05 TILES_WALLS93_3
+    {0x22, TYPE_WALLS, 0, 0, "walls93.obl"}, // 06 TILES_WALLS93_4
+    {0x00, TYPE_WALLS, 0, 0, "walls93.obl"}, // 07 TILES_WALLS93_5
+    {0x00, TYPE_WALLS, 0, 0, "walls93.obl"}, // 08 TILES_WALLS93_6
+    {0x00, TYPE_WALLS, 0, 0, "walls93.obl"}, // 09 TILES_WALLS93_7
+    {0x2e, TYPE_WALLS, 0, 0, "rock1.obl"}, // 0a TILES_ROCK1
+    {0x2c, TYPE_WALLS, 0, 0, "rock2.obl"}, // 0b TILES_ROCK2
+    {0x3b, TYPE_WALLS, 0, 0, "rock3.obl"}, // 0c TILES_ROCK3
+    {0x58, TYPE_WALLS, 0, 0, "wall_brick.obl"}, // 0d TILES_WALL_BRICK
+    {0x57, TYPE_WALLS, 0, 0, "wall_brick.obl"}, // 0e TILES_WALL_BRICK_2
+    {0x51, TYPE_WALLS, 0, 0, "wall_brick.obl"}, // 0f TILES_WALL_BRICK_3
+    {0x5a, TYPE_WALLS, 0, 0, "wall_brick.obl"}, // 10 TILES_WALL_BRICK_4
+    {0x4b, TYPE_WALLS, 0, 0, "wall_brick.obl"}, // 11 TILES_WALL_BRICK_5
+    {0x55, TYPE_WALLS, 0, 0, "wall_brick.obl"}, // 12 TILES_WALL_BRICK_6
+    {0x00, TYPE_WALLS, 0, 0, "wall_brick.obl"}, // 13 TILES_WALL_BRICK_7
+    {0x00, TYPE_WALLS, 0, 0, "colorwalls.obl"}, // 14 TILES_COLORWALLS
+    {0x00, TYPE_WALLS, 0, 0, "colorwalls.obl"}, // 15 TILES_COLORWALLS_2
+    {0x00, TYPE_WALLS, 0, 0, "colorwalls.obl"}, // 16 TILES_COLORWALLS_3
+    {0x00, TYPE_WALLS, 0, 0, "colorwalls.obl"}, // 17 TILES_COLORWALLS_4
+    {0x00, TYPE_WALLS, 0, 0, "colorwalls.obl"}, // 18 TILES_COLORWALLS_5
+    {0x00, TYPE_WALLS, 0, 0, "colorwalls.obl"}, // 19 TILES_COLORWALLS_6
+    {0x00, TYPE_WALLS, 0, 0, "colorwalls.obl"}, // 1a TILES_COLORWALLS_7
+    {0x00, TYPE_WALLS, 0, 0, "colorwalls.obl"}, // 1b TILES_COLORWALLS_8
+    {0x00, TYPE_WALLS, 0, 0, "colorwalls.obl"}, // 1c TILES_COLORWALLS_9
+    {0x00, TYPE_WALLS, 0, 0, "colorwalls.obl"}, // 1d TILES_COLORWALLS_A
+    {0x00, TYPE_WALLS, 0, 0, "colorwalls.obl"}, // 1e TILES_COLORWALLS_B
+    {0x00, TYPE_WALLS, 0, 0, "colorwalls.obl"}, // 1f TILES_COLORWALLS_C
+    {0x00, TYPE_WALLS, 0, 0, "colorwalls.obl"}, // 20 TILES_COLORWALLS_D
+    {0x00, TYPE_WALLS, 0, 0, "colorwalls.obl"}, // 21 TILES_COLORWALLS_E
+    {0x00, TYPE_WALLS, 0, 0, "colorwalls.obl"}, // 22 TILES_COLORWALLS_F
+    {0x00, TYPE_WALLS, 0, 0, "colorwalls.obl"}, // 23 TILES_COLORWALLS_10
+    {0x70, TYPE_WALLS, 0, 0, "pinetree.obl"}, // 24 TILES_PINETREE
+    {0x00, TYPE_BACKGROUND, 0, 0, "plants.obl"}, // 25 TILES_PLANTS
+    {0x00, TYPE_BACKGROUND, 0, 0, "plants.obl"}, // 26 TILES_PLANTS_2
+    {0x00, TYPE_BACKGROUND, 0, 0, "plants.obl"}, // 27 TILES_PLANTS_3
+    {0x00, TYPE_BACKGROUND, 0, 0, "plants.obl"}, // 28 TILES_PLANTS_4
+    {0x00, TYPE_BACKGROUND, 0, 0, "plants.obl"}, // 29 TILES_PLANTS_5
+    {0x00, TYPE_BACKGROUND, 0, 0, "plants.obl"}, // 2a TILES_PLANTS_6
+    {0x00, TYPE_BACKGROUND, 0, 0, "plants.obl"}, // 2b TILES_PLANTS_7
+    {0x3c, TYPE_WALLS, 0, 0, "thisway.obl"}, // 2c TILES_THISWAY
+    {0x3e, TYPE_WALLS, 0, 0, "thisway.obl"}, // 2d TILES_THISWAY_2
+    {0x26, TYPE_PICKUP, 3, 0, "fruit1.obl"}, // 2e TILES_FRUIT1
+    {0x21, TYPE_PICKUP, 15, 8, "neckless.obl"}, // 2f TILES_NECKLESS
+    {0x61, TYPE_PICKUP, 20, 0, "apple.obl"}, // 30 TILES_APPLE
+    {0x62, TYPE_PICKUP, 12, 0, "book.obl"}, // 31 TILES_BOOK
+    {0x42, TYPE_PICKUP, 30, 0, "ballon1.obl"}, // 32 TILES_BALLON1
+    {0x63, TYPE_PICKUP, 5, 0, "carotte.obl"}, // 33 TILES_CAROTTE
+    {0x43, TYPE_PICKUP, 5, 0, "carotte.obl"}, // 34 TILES_CAROTTE_2
+    {0x47, TYPE_PICKUP, 50, 0, "chest.obl"}, // 35 TILES_CHEST
+    {0x00, TYPE_WALLS, 0, 0, "statue.obl"}, // 36 TILES_STATUE
+    {0x74, TYPE_WALLS, 0, 0, "tomb.obl"}, // 37 TILES_TOMB
+    {0x6d, TYPE_WALLS, 0, 0, "mushroom.obl"}, // 38 TILES_MUSHROOM
+    {0x00, TYPE_PICKUP, 22, 0, "small_mush.obl"}, // 39 TILES_SMALL_MUSH
+    {0x00, TYPE_PICKUP, 22, 0, "small_mush.obl"}, // 3a TILES_SMALL_MUSH_2
+    {0x00, TYPE_PICKUP, 22, 0, "small_mush.obl"}, // 3b TILES_SMALL_MUSH_3
+    {0x00, TYPE_PICKUP, 22, 0, "small_mush.obl"}, // 3c TILES_SMALL_MUSH_4
+    {0x5b, TYPE_WALLS, 0, 0, "pot.obl"}, // 3d TILES_POT
+    {0x5d, TYPE_WALLS, 0, 0, "pot.obl"}, // 3e TILES_POT_2
+    {0x4a, TYPE_WALLS, 0, 0, "jar1.obl"}, // 3f TILES_JAR1
+    {0x77, TYPE_PICKUP, 16, 0, "watermel.obl"}, // 40 TILES_WATERMEL
+    {0x00, TYPE_WALLS, 0, 0, "boulder.obl"}, // 41 TILES_BOULDER
+    {0x00, TYPE_WALLS, 0, 0, "boulder.obl"}, // 42 TILES_BOULDER_2
+    {0x3f, TYPE_PICKUP, 21, 0, "magicbox.obl"}, // 43 TILES_MAGICBOX
+    {0x2a, TYPE_PICKUP, 40, 0, "magicbot.obl"}, // 44 TILES_MAGICBOT
+    {0x00, TYPE_PICKUP, 22, 0, "lightbul.obl"}, // 45 TILES_LIGHTBUL
+    {0x2b, TYPE_PICKUP, 9, 0, "1st_aid.obl"}, // 46 TILES_1ST_AID
+    {0x00, TYPE_PICKUP, 27, 0, "rope.obl"}, // 47 TILES_ROPE
+    {0x53, TYPE_PICKUP, 37, 0, "shield.obl"}, // 48 TILES_SHIELD
+    {0x6f, TYPE_PICKUP, 44, 0, "vials.obl"}, // 49 TILES_VIALS
+    {0x00, TYPE_PICKUP, 44, 0, "vials.obl"}, // 4a TILES_VIALS_2
+    {0x00, TYPE_PICKUP, 44, 0, "vials.obl"}, // 4b TILES_VIALS_3
+    {0x67, TYPE_PICKUP, 4, 0, "poire.obl"}, // 4c TILES_POIRE
+    {0x00, TYPE_PICKUP, 45, 0, "clover.obl"}, // 4d TILES_CLOVER
+    {0x00, TYPE_PICKUP, 32, 0, "pumpkin.obl"}, // 4e TILES_PUMPKIN
+    {0x40, TYPE_PICKUP, 60, 4, "flowers.obl"}, // 4f TILES_FLOWERS
+    {0x46, TYPE_PICKUP, 60, 4, "flowers.obl"}, // 50 TILES_FLOWERS_2
+    {0x48, TYPE_DOOR, 0, 0, "heartdoor.obl"}, // 51 TILES_HEARTDOOR
+    {0x68, TYPE_KEY, 50, 0, "heartkey.obl"}, // 52 TILES_HEARTKEY
+    {0x00, TYPE_DOOR, 0, 0, "graydoor.obl"}, // 53 TILES_GRAYDOOR
+    {0x00, TYPE_KEY, 50, 0, "graykey.obl"}, // 54 TILES_GRAYKEY
+    {0x00, TYPE_DOOR, 0, 0, "popdoor.obl"}, // 55 TILES_POPDOOR
+    {0x00, TYPE_KEY, 50, 0, "popkey.obl"}, // 56 TILES_POPKEY
+    {0x52, TYPE_DOOR, 0, 0, "reddoor.obl"}, // 57 TILES_REDDOOR
+    {0x72, TYPE_KEY, 50, 0, "redkey.obl"}, // 58 TILES_REDKEY
+    {0x59, TYPE_DOOR, 0, 0, "yeldoor.obl"}, // 59 TILES_YELDOOR
+    {0x79, TYPE_KEY, 50, 0, "yelkey.obl"}, // 5a TILES_YELKEY
+    {0x5e, TYPE_SWAMP, 0, 0, "swamp.obl"}, // 5b TILES_SWAMP
+    {0x24, TYPE_DIAMOND, 10, 6, "diamond.obl"}, // 5c TILES_DIAMOND
+    {0x54, TYPE_PICKUP, 99, 0, "triforce.obl"}, // 5d TILES_TRIFORCE
+    {0x4f, TYPE_PICKUP, 67, 0, "orb.obl"}, // 5e TILES_ORB
+    {0x00, TYPE_PICKUP, 66, 0, "tntstick.obl"}, // 5f TILES_TNTSTICK
+    {0x41, TYPE_MONSTER, 0, 0, "alpha.obl"}, // 60 TILES_ALPHA
+    {0x00, TYPE_MONSTER, 0, 0, "blueghos.obl"}, // 61 TILES_BLUEGHOS
+    {0x44, TYPE_MONSTER, 0, 0, "deico.obl"}, // 62 TILES_DEICO
+    {0x2f, TYPE_WALLS, 0, 0, "forcef94.obl"}, // 63 TILES_FORCEF94
+    {0x5f, TYPE_WALLS, 0, 0, "forcefih.obl"}, // 64 TILES_FORCEFIH
+    {0x7c, TYPE_WALLS, 0, 0, "forcefiv.obl"}, // 65 TILES_FORCEFIV
+    {0x69, TYPE_MONSTER, 0, 0, "insect1.obl"}, // 66 TILES_INSECT1
+    {0x6c, TYPE_MONSTER, 0, 0, "lutin.obl"}, // 67 TILES_LUTIN
+    {0x4d, TYPE_MONSTER, 0, 0, "manka.obl"}, // 68 TILES_MANKA
+    {0x00, TYPE_MONSTER, 0, 0, "maxkiller.obl"}, // 69 TILES_MAXKILLER
+    {0x00, TYPE_MONSTER, 0, 0, "octopus.obl"}, // 6a TILES_OCTOPUS
+    {0x00, TYPE_MONSTER, 0, 0, "ooo.obl"}, // 6b TILES_OOO
+    {0x00, TYPE_MONSTER, 0, 0, "teddy93.obl"}, // 6c TILES_TEDDY93
+    {0x76, TYPE_VAMPLANT, 0, 0, "vamplant.obl"}, // 6d TILES_VAMPLANT
+    {0x00, TYPE_MONSTER, 0, 0, "yahoo.obl"}, // 6e TILES_YAHOO
+    {0x00, TYPE_MONSTER, 0, 0, "yiga.obl"}, // 6f TILES_YIGA
+    {0x00, TYPE_MONSTER, 0, 0, "yelkiller.obl"}, // 70 TILES_YELKILLER
+    {0x71, TYPE_DRONE, 0, 0, "whteworm.obl"}, // 71 TILES_WHTEWORM
+    {0x00, TYPE_DRONE, 0, 0, "eturtle.obl"}, // 72 TILES_ETURTLE
+    {0x00, TYPE_DRONE, 0, 0, "drago.obl"}, // 73 TILES_DRAGO
+    {0x00, TYPE_DRONE, 0, 0, "bird.obl"} // 74 TILES_BIRD
 };
 
 const uint8_t chMap[] = {
