@@ -15,7 +15,6 @@ Current status is alpha. 90% of the core mechanic has been implemented.
 I am also releasing the source code for the map editor:
 https://github.com/cfrankb/cs3-map-edit
 
-
 # Software required
 
 esp-idf v4.4 or later.
@@ -61,8 +60,9 @@ https://www.aliexpress.com/item/32345829014.html
 
 | JOYSTICK | wirecolor | GPIO Pin |
 | -------- | --------- | -------- |
-| VRX      | BROWN     | 35       |
-| VRY      | WHITE     | 34       |
+| VRX      | brown     | 35       |
+| VRY      | white     | 34       |
+| SW       | blue      | 26       |
 | GRN      | black     |          |
 | VCC      | red       | 3.3v     |
 

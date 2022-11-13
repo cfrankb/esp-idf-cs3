@@ -61,7 +61,7 @@ extern "C" void app_main(void)
     {
         vTaskDelay(40 / portTICK_RATE_MS);
 
-        if (ticks % 2 == 0)
+        if (ticks % 3 == 0)
         {
             game.managePlayer();
         }

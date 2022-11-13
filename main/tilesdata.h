@@ -11,7 +11,8 @@ typedef struct
     uint8_t ch;
     uint8_t type;
     uint8_t score;
-    uint8_t health;
+    int8_t health;
+    uint8_t hidden;
     const char * basename;
 } TileDef;
 uint8_t getChTile(uint8_t i) ;

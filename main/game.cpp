@@ -18,7 +18,7 @@
 
 #define elif else if
 #define TILESIZE 16
-#define __SPEED_TEST__
+//#define __SPEED_TEST__
 
 CFont font;
 CMap map(30, 30);
@@ -170,7 +170,6 @@ bool CGame::loadLevel()
 
     char target[20];
     char fpath[64];
-    // sprintf(fname, "/spiffs/level%.2d.map", m_level + 1);
     sprintf(target, "level%.2d", m_level + 1);
     std::string fname = findLevel(target);
     sprintf(fpath, "/spiffs/%s", fname.c_str());
@@ -318,7 +317,6 @@ int CGame::addMonster(const CActor actor)
         m_monsters = t;
     }
     m_monsters[m_monsterCount++] = actor;
-
     return m_monsterCount;
 }
 
@@ -338,6 +336,7 @@ int CGame::findMonsterAt(int x, int y)
 void CGame::manageMonsters()
 {
     u_int8_t dirs[] = {AIM_UP, AIM_DOWN, AIM_LEFT, AIM_RIGHT};
+    std::vector<CActor> newMonsters;
 
     for (int i = 0; i < m_monsterCount; ++i)
     {
@@ -348,7 +347,9 @@ void CGame::manageMonsters()
         {
             if (actor.isPlayerThere(actor.getAim()))
             {
-                addHealth(-6);
+                // attack player
+                // apply health damages
+                addHealth(def.health);
             }
 
             int aim = actor.findNextDir();
@@ -363,6 +364,12 @@ void CGame::manageMonsters()
             if (aim < AIM_LEFT)
             {
                 aim = AIM_LEFT;
+            }
+            if (actor.isPlayerThere(actor.getAim()))
+            {
+                // attack player
+                // apply health damages
+                addHealth(def.health);
             }
             if (actor.canMove(aim))
             {
@@ -380,17 +387,19 @@ void CGame::manageMonsters()
             {
                 Pos p = CGame::translate(Pos{actor.getX(), actor.getY()}, dirs[i]);
                 uint8_t c = map.at(p.x, p.y);
-                const TileDef def = getTileDef(c);
-                if (def.type == TYPE_PLAYER)
+                const TileDef &defT = getTileDef(c);
+                if (defT.type == TYPE_PLAYER)
                 {
-                    addHealth(-1);
+                    // apply damage from config
+                    addHealth(def.health);
                 }
-                elif (def.type == TYPE_SWAMP)
+                elif (defT.type == TYPE_SWAMP)
                 {
                     map.set(p.x, p.y, TILES_VAMPLANT);
-                    addMonster(CActor(p.x, p.y, TYPE_VAMPLANT));
+                    newMonsters.push_back(CActor(p.x, p.y, TYPE_VAMPLANT));
+                    break;
                 }
-                elif (def.type == TYPE_MONSTER)
+                elif (defT.type == TYPE_MONSTER)
                 {
                     int j = findMonsterAt(p.x, p.y);
                     if (j == -1)
@@ -398,9 +407,16 @@ void CGame::manageMonsters()
                     CActor &m = m_monsters[j];
                     m.setType(TYPE_VAMPLANT);
                     map.set(p.x, p.y, TILES_VAMPLANT);
+                    break;
                 }
             }
         }
+    }
+
+    // moved here to avoid reallocation while using a reference
+    for (auto const monster : newMonsters)
+    {
+        addMonster(monster);
     }
 }
 
@@ -497,8 +513,7 @@ void CGame::clearAttr(u_int8_t attr)
                 {
                     --m_diamonds;
                 }
-
-                map.set(x, y, 0);
+                map.set(x, y, TILES_BLANK);
                 map.setAttr(x, y, 0);
             }
         }

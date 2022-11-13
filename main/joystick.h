@@ -7,6 +7,7 @@ enum JoyDir
     JOY_DOWN = 2,
     JOY_LEFT = 4,
     JOY_RIGHT = 8,
+    JOY_BUTTON = 16,
     JOY_NONE = 0
 };
 
