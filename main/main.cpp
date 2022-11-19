@@ -61,6 +61,11 @@ extern "C" void app_main(void)
     {
         vTaskDelay(40 / portTICK_RATE_MS);
 
+        if (game.mode() != CGame::MODE_LEVEL)
+        {
+            continue;
+        }
+
         if (ticks % 3 == 0)
         {
             game.managePlayer();

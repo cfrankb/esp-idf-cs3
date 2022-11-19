@@ -12,7 +12,7 @@ typedef struct
     uint8_t type;
     uint8_t score;
     int8_t health;
-    uint8_t hidden;
+    bool hidden;
     const char * basename;
 } TileDef;
 uint8_t getChTile(uint8_t i) ;
@@ -135,6 +135,6 @@ const TileDef & getTileDef(int i);
 #define TILES_WHTEWORM       0x71
 #define TILES_ETURTLE        0x72
 #define TILES_DRAGO          0x73
-#define TILES_BIRD           0x74
+#define TILES_LEFTBIRD       0x74
 
 #endif

@@ -98,12 +98,12 @@ const TileDef tileDefs[]={
     {0x79, TYPE_KEY, 50, 0, false, "yelkey.obl"}, // 5a TILES_YELKEY
     {0x5e, TYPE_SWAMP, 0, 0, false, "swamp.obl"}, // 5b TILES_SWAMP
     {0x24, TYPE_DIAMOND, 10, 6, false, "diamond.obl"}, // 5c TILES_DIAMOND
-    {0x54, TYPE_PICKUP, 99, 0, false, "triforce.obl"}, // 5d TILES_TRIFORCE
-    {0x4f, TYPE_PICKUP, 67, 0, false, "orb.obl"}, // 5e TILES_ORB
+    {0x54, TYPE_PICKUP, 99, 20, false, "triforce.obl"}, // 5d TILES_TRIFORCE
+    {0x4f, TYPE_PICKUP, 67, 10, false, "orb.obl"}, // 5e TILES_ORB
     {0x00, TYPE_PICKUP, 66, 0, false, "tntstick.obl"}, // 5f TILES_TNTSTICK
-    {0x41, TYPE_MONSTER, 0, 0, false, "alpha.obl"}, // 60 TILES_ALPHA
-    {0x00, TYPE_MONSTER, 0, 0, false, "blueghos.obl"}, // 61 TILES_BLUEGHOS
-    {0x44, TYPE_MONSTER, 0, 0, false, "deico.obl"}, // 62 TILES_DEICO
+    {0x41, TYPE_MONSTER, 0, -20, false, "alpha.obl"}, // 60 TILES_ALPHA
+    {0x00, TYPE_MONSTER, 0, -9, false, "blueghos.obl"}, // 61 TILES_BLUEGHOS
+    {0x44, TYPE_MONSTER, 0, -4, false, "deico.obl"}, // 62 TILES_DEICO
     {0x2f, TYPE_WALLS, 0, 0, false, "forcef94.obl"}, // 63 TILES_FORCEF94
     {0x5f, TYPE_WALLS, 0, 0, false, "forcefih.obl"}, // 64 TILES_FORCEFIH
     {0x7c, TYPE_WALLS, 0, 0, false, "forcefiv.obl"}, // 65 TILES_FORCEFIV
@@ -118,10 +118,10 @@ const TileDef tileDefs[]={
     {0x00, TYPE_MONSTER, 0, -6, false, "yahoo.obl"}, // 6e TILES_YAHOO
     {0x00, TYPE_MONSTER, 0, -6, false, "yiga.obl"}, // 6f TILES_YIGA
     {0x00, TYPE_MONSTER, 0, -10, false, "yelkiller.obl"}, // 70 TILES_YELKILLER
-    {0x71, TYPE_DRONE, 0, -5, false, "whteworm.obl"}, // 71 TILES_WHTEWORM
-    {0x00, TYPE_DRONE, 0, -8, false, "eturtle.obl"}, // 72 TILES_ETURTLE
-    {0x00, TYPE_DRONE, 0, -9, false, "drago.obl"}, // 73 TILES_DRAGO
-    {0x00, TYPE_DRONE, 0, -10, false, "bird.obl"} // 74 TILES_BIRD
+    {0x71, TYPE_DRONE, 0, -5, true, "whteworm.obl"}, // 71 TILES_WHTEWORM
+    {0x00, TYPE_DRONE, 0, -8, true, "eturtle.obl"}, // 72 TILES_ETURTLE
+    {0x00, TYPE_DRONE, 0, -9, true, "drago.obl"}, // 73 TILES_DRAGO
+    {0x00, TYPE_DRONE, 0, -10, true, "bird.obl"} // 74 TILES_LEFTBIRD
 };
 
 const uint8_t chMap[] = {

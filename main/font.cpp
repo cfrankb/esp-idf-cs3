@@ -2,8 +2,6 @@
 #include <cstring>
 #include <cstdio>
 
-const int dataOffset = 7;
-
 CFont::CFont()
 {
     m_font = nullptr;

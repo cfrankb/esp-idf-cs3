@@ -5,6 +5,10 @@
 #include "map.h"
 #include "tilesdata.h"
 
+#define CS3_MAP_WIDTH 64
+#define CS3_MAP_HEIGHT 64
+#define CS3_MAP_OFFSET 7
+
 std::string str2upper(const std::string in)
 {
     char t[in.length() + 1];
@@ -103,7 +107,6 @@ bool processLevel(CMap &map, const char *fname)
     uint8_t *data = readFile(fname);
     if (data == nullptr)
     {
-        // delete[] data;
         printf("failed read: %s\n", fname);
         return false;
     }
@@ -124,7 +127,6 @@ bool processLevel(CMap &map, const char *fname)
         }
 
         ps = u ? u + 1 : nullptr;
-        //   printf("maxrows %d\n", maxRows);
     }
     printf("maxRows: %d, maxCols:%d\n", maxRows, maxCols);
 
@@ -225,14 +227,14 @@ bool convertCs3Level(CMap &map, const char *fname)
     }
 
     map.clear();
-    map.resize(64, 64, true);
-    uint8_t *p = data + 7;
-    for (int y = 0; y < 64; ++y)
+    map.resize(CS3_MAP_WIDTH, CS3_MAP_HEIGHT, true);
+    uint8_t *p = data + CS3_MAP_OFFSET;
+    for (int y = 0; y < CS3_MAP_HEIGHT; ++y)
     {
-        for (int x = 0; x < 64; ++x)
+        for (int x = 0; x < CS3_MAP_WIDTH; ++x)
         {
             uint8_t oldTile = *p;
-            if (oldTile >= sizeof(convTable) / 2)
+            if (oldTile >= sizeof(convTable) / sizeof(convTable[0]))
             {
                 printf("oldTile: %d", oldTile);
                 oldTile = 0;
@@ -274,7 +276,7 @@ bool fetchLevel(CMap &map, const char *fname, std::string &error)
 
     fseek(sfile, 0, SEEK_END);
     int size = ftell(sfile);
-    const int cs3LevelSize = 64 * 64 + 7;
+    const int cs3LevelSize = CS3_MAP_WIDTH * CS3_MAP_HEIGHT + CS3_MAP_OFFSET;
     if (size == cs3LevelSize)
     {
         fclose(sfile);

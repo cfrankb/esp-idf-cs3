@@ -203,8 +203,7 @@ void CGame::animate()
         AnimzSeq &seq = animzSeq[i];
         int j = seq.srcTile;
         tileReplacement[j] = seq.startSeq + seq.index;
-        ++seq.index;
-        seq.index = seq.index % seq.count;
+        seq.index = seq.index < seq.count - 1 ? seq.index + 1 : 0;
     }
 }
 
@@ -347,7 +346,6 @@ void CGame::manageMonsters()
         {
             if (actor.isPlayerThere(actor.getAim()))
             {
-                // attack player
                 // apply health damages
                 addHealth(def.health);
             }
@@ -367,7 +365,6 @@ void CGame::manageMonsters()
             }
             if (actor.isPlayerThere(actor.getAim()))
             {
-                // attack player
                 // apply health damages
                 addHealth(def.health);
             }
