@@ -236,7 +236,7 @@ bool convertCs3Level(CMap &map, const char *fname)
             uint8_t oldTile = *p;
             if (oldTile >= sizeof(convTable) / sizeof(convTable[0]))
             {
-                printf("oldTile: %d", oldTile);
+                printf("oldTile: %d\n", oldTile);
                 oldTile = 0;
             }
             const uint16_t data = convTable[oldTile];

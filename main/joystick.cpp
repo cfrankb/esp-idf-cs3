@@ -13,6 +13,7 @@ VRY WHITE   34
 */
 
 #define JOYSTICK_SW GPIO_NUM_26
+#define JOYSTICK_A_BUTTON GPIO_NUM_4
 
 static const adc1_channel_t channel1 = ADC1_CHANNEL_6; // GPIO34 if ADC1, GPIO14 if ADC2
 static const adc1_channel_t channel2 = ADC1_CHANNEL_7; // GPIO35 if ADC1 ???
@@ -44,6 +45,13 @@ bool initJoystick()
     {
         ESP_LOGE(TAG, "gpio_set_direction Failed (%s)", esp_err_to_name(ret));
     }
+
+    ret = gpio_set_direction(JOYSTICK_A_BUTTON, GPIO_MODE_INPUT);
+    if (ret != ESP_OK)
+    {
+        ESP_LOGE(TAG, "gpio_set_direction Failed (%s)", esp_err_to_name(ret));
+    }
+
     ret = gpio_set_pull_mode(JOYSTICK_SW, GPIO_PULLUP_ONLY);
     if (ret != ESP_OK)
     {
@@ -52,11 +60,12 @@ bool initJoystick()
     return true;
 }
 
-bool readJoystick(int &joy, int &aim)
+uint16_t readJoystick()
 {
     uint32_t adc_vrx = 0;
     uint32_t adc_vry = 0;
     int button = gpio_get_level(JOYSTICK_SW);
+    int a_button = gpio_get_level(JOYSTICK_A_BUTTON);
 
     adc_vry = adc1_get_raw((adc1_channel_t)channel1);
     adc_vrx = adc1_get_raw((adc1_channel_t)channel2);
@@ -65,28 +74,23 @@ bool readJoystick(int &joy, int &aim)
     if (adc_vrx == -1)
         return false;
 
-    aim = AIM_NONE;
-    joy = JOY_NONE;
+    uint16_t joy = JOY_NONE;
 
     if (adc_vry < 1800)
     {
-        aim = AIM_UP;
         joy |= JOY_UP;
     }
     else if (adc_vry > 3000)
     {
-        aim = AIM_DOWN;
         joy |= JOY_DOWN;
     }
 
     if (adc_vrx < 1800)
     {
-        aim = AIM_LEFT;
         joy |= JOY_LEFT;
     }
     else if (adc_vrx > 3000)
     {
-        aim = AIM_RIGHT;
         joy |= JOY_RIGHT;
     }
 
@@ -95,10 +99,15 @@ bool readJoystick(int &joy, int &aim)
         joy |= JOY_BUTTON;
     }
 
-    /*if (joy)
+    if (a_button)
     {
-        printf("Knob at X:[%d] Y:[%d] [%d] [%d]\n", adc_vrx, adc_vry, button, joy);
-    }*/
+        joy |= JOY_A_BUTTON;
+    }
 
-    return true;
+    /* if (joy)
+     {
+         printf("Knob at X:[%d] Y:[%d] [%d] [%d]\n", adc_vrx, adc_vry, button, joy);
+     }*/
+
+    return joy;
 }

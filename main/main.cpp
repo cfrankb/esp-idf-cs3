@@ -82,7 +82,8 @@ extern "C" void app_main(void)
         }
         ++ticks;
 
-        if (game.goalCount() == 0)
+        uint16_t joy = readJoystick();
+        if (game.goalCount() == 0 || joy & JOY_A_BUTTON)
         {
             game.nextLevel();
         }

@@ -159,7 +159,12 @@ void CGame::nextLevel()
     printf("nextLevel\n");
     m_score += 500 + m_health;
     ++m_level;
-    loadLevel();
+    ++m_levelCount;
+    if (!loadLevel())
+    {
+        m_level = 0;
+        loadLevel();
+    }
 }
 
 bool CGame::loadLevel()
@@ -169,13 +174,21 @@ bool CGame::loadLevel()
     setMode(MODE_INTRO);
 
     char target[20];
-    char fpath[64];
     sprintf(target, "level%.2d", m_level + 1);
     std::string fname = findLevel(target);
-    sprintf(fpath, "/spiffs/%s", fname.c_str());
+    if (fname[0] == '\0')
+    {
+        // no level found
+        return false;
+    }
+    const char *path = "spiffs";
+    char fpath[strlen(path) + fname.length() + 5];
+    sprintf(fpath, "/%s/%s", path, fname.c_str());
     std::string error;
     if (!fetchLevel(map, fpath, error))
     {
+        printf("error: %s\n", error.c_str());
+        // unable to load level
         return false;
     }
     printf("level loaded\n");
@@ -184,13 +197,10 @@ bool CGame::loadLevel()
 
     Pos pos = map.findFirst(TILES_ANNIE2);
     printf("Player at: %d %d\n", pos.x, pos.y);
-    // map.read("/spiffs/level01.dat");
     m_player = CActor(pos, TYPE_PLAYER, AIM_DOWN);
     m_diamonds = map.count(TILES_DIAMOND);
     memset(m_keys, 0, sizeof(m_keys));
-
     m_health = DEFAULT_HEALTH;
-
     findMonsters();
 
     return true;
@@ -210,7 +220,7 @@ void CGame::animate()
 void CGame::drawLevelIntro()
 {
     char t[32];
-    sprintf(t, "LEVEL %.2d", m_level + 1);
+    sprintf(t, "LEVEL %.2d", m_levelCount + 1);
 
     int x = (CONFIG_WIDTH - strlen(t) * 8) / 2;
     int y = (CONFIG_HEIGHT - 8) / 2;
@@ -419,9 +429,7 @@ void CGame::manageMonsters()
 
 void CGame::managePlayer()
 {
-    int joy;
-    int aim;
-    readJoystick(joy, aim);
+    uint16_t joy = readJoystick();
     joy && ((joy & JOY_UP && move(AIM_UP)) ||
             (joy & JOY_DOWN && move(AIM_DOWN)) ||
             (joy & JOY_LEFT && move(AIM_LEFT)) ||

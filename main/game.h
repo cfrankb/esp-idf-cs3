@@ -40,6 +40,7 @@ public:
 protected:
     int m_health = 0;
     int m_level = 0;
+    int m_levelCount = 0;
     int m_score = 0;
     int m_diamonds = 0;
     static uint8_t m_keys[6];
