@@ -13,6 +13,7 @@ set(SOURCES
     font.cpp
     colors.cpp
     driver.cpp
+    engine.cpp
 )
 
 idf_component_register(

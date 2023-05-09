@@ -5,6 +5,7 @@
 #include "map.h"
 
 class CMap;
+class CEngine;
 
 class CGame
 {
@@ -68,5 +69,7 @@ protected:
     int findMonsterAt(int x, int y);
 
     void addHealth(int hp);
+
+    CEngine *m_engine;
 };
 #endif

@@ -15,20 +15,20 @@
 #include "animzdata.h"
 #include "font.h"
 #include "colors.h"
+#include "engine.h"
 
-#define elif else if
+std::mutex g_mutex;
 #define TILESIZE 16
-//#define __SPEED_TEST__
+#define DMA_BUFFER_LIMIT 2048 // 4092
+#define __SPEED_TEST__
 
-CFont font;
 CMap map(30, 30);
+CFont font;
 CDisplay display;
 CTileSet tiles(TILESIZE, TILESIZE);
 CTileSet animzTiles(TILESIZE, TILESIZE);
 CTileSet playerTiles(TILESIZE, TILESIZE);
-CBuffer buffer(CONFIG_WIDTH, TILESIZE, 1024 * 2);
-
-std::mutex g_mutex;
+CBuffer buffer(CONFIG_WIDTH, TILESIZE, DMA_BUFFER_LIMIT);
 
 typedef struct
 {
@@ -69,6 +69,8 @@ CGame::CGame()
     m_monsters = new CActor[m_monsterMax];
     m_monsterCount = 0;
     m_health = 0;
+
+    m_engine = new CEngine;
 }
 
 CGame::~CGame()
@@ -76,6 +78,11 @@ CGame::~CGame()
     if (m_monsters)
     {
         delete[] m_monsters;
+    }
+
+    if (m_engine)
+    {
+        delete m_engine;
     }
 }
 
@@ -400,13 +407,13 @@ void CGame::manageMonsters()
                     // apply damage from config
                     addHealth(def.health);
                 }
-                elif (defT.type == TYPE_SWAMP)
+                else if (defT.type == TYPE_SWAMP)
                 {
                     map.set(p.x, p.y, TILES_VAMPLANT);
                     newMonsters.push_back(CActor(p.x, p.y, TYPE_VAMPLANT));
                     break;
                 }
-                elif (defT.type == TYPE_MONSTER)
+                else if (defT.type == TYPE_MONSTER)
                 {
                     int j = findMonsterAt(p.x, p.y);
                     if (j == -1)
