@@ -69,8 +69,14 @@ void spi_master_init(TFT_t *dev, gpio_num_t GPIO_MOSI, gpio_num_t GPIO_SCLK, gpi
         .sclk_io_num = GPIO_SCLK,
         .quadwp_io_num = -1,
         .quadhd_io_num = -1,
+        .data4_io_num = -1,
+        .data5_io_num=0,
+        .data6_io_num=0,
+        .data7_io_num=0,
         .max_transfer_sz = 0,
-        .flags = 0};
+        .flags = 0,
+        .intr_flags=0
+    };
 
     ret = spi_bus_initialize(HOST_ID, &buscfg, SPI_DMA_CH_AUTO);
     ESP_LOGD(TAG, "spi_bus_initialize=%d", ret);
@@ -288,7 +294,7 @@ void delayMS(int ms)
 {
     int _ms = ms + (portTICK_PERIOD_MS - 1);
     TickType_t xTicksToDelay = _ms / portTICK_PERIOD_MS;
-    ESP_LOGD(TAG, "ms=%d _ms=%d portTICK_PERIOD_MS=%d xTicksToDelay=%d", ms, _ms, portTICK_PERIOD_MS, xTicksToDelay);
+    //ESP_LOGD(TAG, "ms=%d _ms=%d portTICK_PERIOD_MS=%d xTicksToDelay=%d", ms, _ms, portTICK_PERIOD_MS, xTicksToDelay);
     vTaskDelay(xTicksToDelay);
 }
 

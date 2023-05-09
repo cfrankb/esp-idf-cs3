@@ -32,21 +32,21 @@ void drawScreenTask(void *pvParameter)
         {
         case CGame::MODE_INTRO:
             game.drawLevelIntro();
-            vTaskDelay(2000 / portTICK_RATE_MS);
+            vTaskDelay(2000 / portTICK_PERIOD_MS);
             game.setMode(CGame::MODE_LEVEL);
             break;
         case CGame::MODE_LEVEL:
             game.drawScreen();
         }
 
-        vTaskDelay(20 / portTICK_RATE_MS);
+        vTaskDelay(20 / portTICK_PERIOD_MS);
     }
 }
 
 extern "C" void app_main(void)
 {
     uint32_t before_free = esp_get_free_heap_size();
-    printf("free bytes: %d\n", before_free);
+    printf("free bytes: %ld\n", before_free);
 
     game.init();
     game.loadLevel();
@@ -59,7 +59,7 @@ extern "C" void app_main(void)
 
     while (1)
     {
-        vTaskDelay(40 / portTICK_RATE_MS);
+        vTaskDelay(40 / portTICK_PERIOD_MS);
 
         if (game.mode() != CGame::MODE_LEVEL)
         {

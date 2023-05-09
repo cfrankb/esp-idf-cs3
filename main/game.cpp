@@ -20,7 +20,7 @@
 std::mutex g_mutex;
 #define TILESIZE 16
 #define DMA_BUFFER_LIMIT 2048 // 4092
-#define __SPEED_TEST__
+//#define __SPEED_TEST__
 
 CMap map(30, 30);
 CFont font;
@@ -242,7 +242,7 @@ void CGame::drawScreen()
     std::lock_guard<std::mutex> lk(g_mutex);
 
 #ifdef __SPEED_TEST__
-    int64_t t0 = esp_timer_get_time();
+    int64_t t0 = timer_gettime();
 #endif
     const int cols = CONFIG_WIDTH / TILESIZE;
     const int rows = CONFIG_HEIGHT / TILESIZE;
@@ -296,7 +296,7 @@ void CGame::drawScreen()
     }
 
 #ifdef __SPEED_TEST__
-    int64_t t1 = esp_timer_get_time();
+    int64_t t1 = timer_gettime();
     printf("time: %ld\n", (long)(t1 - t0) / 1000);
 #endif
 }
@@ -428,7 +428,7 @@ void CGame::manageMonsters()
     }
 
     // moved here to avoid reallocation while using a reference
-    for (auto const monster : newMonsters)
+    for (auto const & monster : newMonsters)
     {
         addMonster(monster);
     }
