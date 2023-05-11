@@ -72,7 +72,7 @@ https://www.aliexpress.com/item/32345829014.html
 
 ## Button Module (optional)
 
-https://www.aliexpress.com/item/32909058328.htm
+https://www.aliexpress.com/item/32909058328.html
 
 | Module | wirecolor | GPIO Pin  |
 | ------ | --------- | --------- |
