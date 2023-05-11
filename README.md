@@ -38,6 +38,10 @@ idf.py flash
 | ST7789  | 240x320    | 20M          | True        |
 | ILI9341 | 240x320    | 40M          | False       |
 
+## ESP-32
+
+https://www.aliexpress.com/item/32959541446.html
+
 ## ST7789
 
 https://www.aliexpress.com/item/1005004343881408.html
@@ -67,6 +71,8 @@ https://www.aliexpress.com/item/32345829014.html
 | VCC      | red       | 3.3v     |
 
 ## Button Module (optional)
+
+https://www.aliexpress.com/item/32909058328.htm
 
 | Module | wirecolor | GPIO Pin  |
 | ------ | --------- | --------- |
