@@ -72,7 +72,7 @@ https://www.aliexpress.com/item/32345829014.html
 
 ## Dupont cables
 
-https://www.aliexpress.com/item/1005004611997111.htm
+https://www.aliexpress.com/item/1005004611997111.html
 
 ## Button Module (optional)
 
