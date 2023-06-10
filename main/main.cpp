@@ -2,10 +2,10 @@
 
 #include <stdio.h>
 
-#include <driver/gpio.h>
-#include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
-#include <esp_timer.h>
+#include "driver/gpio.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "esp_timer.h"
 #include <cstring>
 #include <cstdio>
 #include <algorithm>
@@ -19,6 +19,7 @@
 #include "level.h"
 #include "tilesdata.h"
 #include "game.h"
+#include "engine.h"
 
 // static const char *TAG = "main";
 
@@ -28,12 +29,20 @@ void drawScreenTask(void *pvParameter)
 {
     while (1)
     {
+        //CEngine *engine = game.getEngine();
+
         switch (game.mode())
         {
         case CGame::MODE_INTRO:
+        case CGame::MODE_RESTART:
+        case CGame::MODE_GAMEOVER:
             game.drawLevelIntro();
             vTaskDelay(2000 / portTICK_PERIOD_MS);
-            game.setMode(CGame::MODE_LEVEL);
+            if (game.mode()== CGame::MODE_GAMEOVER) {
+                game.restartGane();
+            } else {
+                game.setMode(CGame::MODE_LEVEL);
+            }
             break;
         case CGame::MODE_LEVEL:
             game.drawScreen();
@@ -49,7 +58,7 @@ extern "C" void app_main(void)
     printf("free bytes: %ld\n", before_free);
 
     game.init();
-    game.loadLevel();
+    game.loadLevel(false);
 
     TaskHandle_t xHandle = NULL;
     BaseType_t xReturned = xTaskCreate(&drawScreenTask, "drawScreen", 2048, NULL, 5, &xHandle);
@@ -66,7 +75,7 @@ extern "C" void app_main(void)
             continue;
         }
 
-        if (ticks % 3 == 0)
+        if (ticks % 3 == 0 && !game.isPlayerDead())
         {
             game.managePlayer();
         }
@@ -80,12 +89,25 @@ extern "C" void app_main(void)
         {
             game.manageMonsters();
         }
+
+        if (game.isPlayerDead()){
+            game.killPlayer();
+            vTaskDelay(500 / portTICK_PERIOD_MS);
+            if(!game.isGameOver()) {
+                game.restartLevel();
+            } else {
+                game.setMode(CGame::MODE_GAMEOVER);
+            }
+        }
+
         ++ticks;
 
         uint16_t joy = readJoystick();
-        if (game.goalCount() == 0 || joy & JOY_A_BUTTON)
-        {
-            game.nextLevel();
+        if (!game.isGameOver()) {
+            if (game.goalCount() == 0 || joy & JOY_A_BUTTON)
+            {
+                game.nextLevel();
+            }
         }
     }
 

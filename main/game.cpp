@@ -69,7 +69,8 @@ CGame::CGame()
     m_monsters = new CActor[m_monsterMax];
     m_monsterCount = 0;
     m_health = 0;
-
+    m_lives = DEFAULT_LIVES;
+    m_score = 0;
     m_engine = new CEngine;
 }
 
@@ -167,18 +168,23 @@ void CGame::nextLevel()
     m_score += 500 + m_health;
     ++m_level;
     ++m_levelCount;
-    if (!loadLevel())
+    if (!loadLevel(false))
     {
         m_level = 0;
-        loadLevel();
+        loadLevel(false);
     }
 }
 
-bool CGame::loadLevel()
+void CGame::restartLevel()
+{
+    loadLevel(true);
+}
+
+bool CGame::loadLevel(bool restart)
 {
     printf("loading level: %d ...\n", m_level + 1);
     std::lock_guard<std::mutex> lk(g_mutex);
-    setMode(MODE_INTRO);
+    setMode(restart ? MODE_RESTART :MODE_INTRO);
 
     char target[20];
     sprintf(target, "level%.2d", m_level + 1);
@@ -227,7 +233,17 @@ void CGame::animate()
 void CGame::drawLevelIntro()
 {
     char t[32];
-    sprintf(t, "LEVEL %.2d", m_levelCount + 1);
+    switch (m_mode)
+    {
+    case CGame::MODE_INTRO:
+        sprintf(t, "LEVEL %.2d", m_level + 1);
+    break;
+    case CGame::MODE_RESTART:
+        sprintf(t, "LIVES LEFT %.2d", m_lives);
+    break;
+    case CGame::MODE_GAMEOVER:
+        strcpy(t, "GAME OVER");
+    };
 
     int x = (CONFIG_WIDTH - strlen(t) * 8) / 2;
     int y = (CONFIG_HEIGHT - 8) / 2;
@@ -281,11 +297,15 @@ void CGame::drawScreen()
         {
             char tmp[32];
             int bx = 0;
-            sprintf(tmp, "SCORE %.8d ", m_score);
-            buffer.drawFont(0, 0, font, tmp, WHITE);
+            int offsetY = 0;
+            sprintf(tmp, "%.8d ", m_score);
+            buffer.drawFont(0, offsetY, font, tmp, WHITE);
             bx += strlen(tmp);
-            sprintf(tmp, "DIAMONDS %.2d", m_diamonds);
-            buffer.drawFont(bx * 8, 0, font, tmp, YELLOW);
+            sprintf(tmp, "DIAMONDS %.2d ", m_diamonds);
+            buffer.drawFont(bx * 8, offsetY, font, tmp, YELLOW);
+            bx += strlen(tmp);
+            sprintf(tmp, "LIVES %.2d ", m_lives);
+            buffer.drawFont(bx * 8, offsetY, font, tmp, PURPLE);
         }
         else if (y == rows - 1)
         {
@@ -553,3 +573,31 @@ int CGame::mode() const
 {
     return m_mode;
 };
+
+CEngine* CGame::getEngine()
+{
+    return m_engine;
+}
+
+bool CGame::isPlayerDead()
+{
+    return m_health == 0;
+}
+
+void CGame::killPlayer()
+{
+    m_lives = m_lives ? m_lives -1 : 0;
+}
+
+bool CGame::isGameOver()
+{
+    return m_lives == 0;
+}
+
+void CGame::restartGane()
+{
+    m_level = 0;
+    m_score =0;
+    m_lives = DEFAULT_LIVES;
+    loadLevel(false);
+}

@@ -14,7 +14,7 @@ public:
     ~CGame();
 
     bool init();
-    bool loadLevel();
+    bool loadLevel(bool restart);
     void drawScreen();
     void drawLevelIntro();
     bool move(int dir);
@@ -29,16 +29,27 @@ public:
 
     static CMap &getMap();
     void nextLevel();
+    void restartLevel();
+    void restartGane();
     void setMode(int mode);
     int mode() const;
+    bool isPlayerDead();
+    void killPlayer();
+    bool isGameOver();
+    CEngine* getEngine();
 
     enum
     {
         MODE_INTRO = 0,
-        MODE_LEVEL = 1
+        MODE_LEVEL = 1,
+        MODE_RESTART = 2,
+        MODE_GAMEOVER =3,
+        DEFAULT_LIVES = 5,
+        LEVEL_BONUS = 500
     };
 
 protected:
+    int m_lives = 0;
     int m_health = 0;
     int m_level = 0;
     int m_levelCount = 0;
