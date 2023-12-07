@@ -33,7 +33,7 @@ int CBuffer::hei()
 void CBuffer::drawTile32(const int x, const int y, uint16_t *tile)
 {
     uint16_t *o = m_buffer + x + y * m_len;
-    uint32_t *p32 = reinterpret_cast<u_int32_t *>(tile);
+    uint32_t *p32 = reinterpret_cast<uint32_t *>(tile);
     for (int yy = 0; yy < 16; ++yy)
     {
         uint32_t *d32 = reinterpret_cast<uint32_t *>(o);
@@ -91,7 +91,7 @@ uint16_t *CBuffer::next(int &len, int &hei)
 
 void CBuffer::fill(const uint16_t color)
 {
-    const u_int16_t fcolor = flipColor(color);
+    const uint16_t fcolor = flipColor(color);
     if (m_buffer)
     {
         for (int i = 0; i < m_len * m_hei; ++i)
@@ -113,7 +113,7 @@ void CBuffer::forget()
 
 void CBuffer::drawFont(int x, int y, CFont &font, const char *s, uint16_t color)
 {
-    const u_int16_t fcolor = flipColor(color);
+    const uint16_t fcolor = flipColor(color);
     for (int j = 0; s[j]; ++j)
     {
         int u = s[j] < 127 ? s[j] - 32 : 0;

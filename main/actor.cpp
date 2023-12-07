@@ -141,7 +141,7 @@ bool CActor::isPlayerThere(uint8_t aim)
     return def.type == TYPE_PLAYER;
 }
 
-u_int8_t CActor::tileAt(uint8_t aim)
+uint8_t CActor::tileAt(uint8_t aim)
 {
     CMap &map = CGame::getMap();
     const Pos p = CGame::translate(Pos{m_x, m_y}, aim);

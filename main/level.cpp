@@ -91,7 +91,7 @@ bool getChMap(const char *mapFile, char *chMap)
         }
         StringVector list;
         splitString(std::string(p), list);
-        u_int8_t ch = std::stoi(list[3], 0, 16);
+        uint8_t ch = std::stoi(list[3], 0, 16);
         p = n;
         chMap[ch] = i;
         ++i;

@@ -1,43 +1,65 @@
 #include "joystick.h"
-#include <freertos/FreeRTOS.h>
 #include "esp_err.h"
 #include "esp_log.h"
 #include "esp_spiffs.h"
-#include <driver/adc.h>
+#include "driver/gpio.h"
+#include "esp_adc/adc_oneshot.h"
+#include "esp_adc/adc_continuous.h"
 #include <cstring>
-/*
-
-VRX BROWN   35
-VRY WHITE   34
-
-*/
 
 #define JOYSTICK_SW GPIO_NUM_26
 #define JOYSTICK_A_BUTTON GPIO_NUM_4
 
-static const adc1_channel_t channel1 = ADC1_CHANNEL_6; // GPIO34 if ADC1, GPIO14 if ADC2
-static const adc1_channel_t channel2 = ADC1_CHANNEL_7; // GPIO35 if ADC1 ???
+#define EXAMPLE_ADC1_CHAN0          ADC_CHANNEL_7       // pin 35 (x) BROWN
+#define EXAMPLE_ADC1_CHAN1          ADC_CHANNEL_6       // pin 34 (y) WHITE
+
+/*#if CONFIG_IDF_TARGET_ESP32
+#define EXAMPLE_ADC1_CHAN0          ADC_CHANNEL_4
+#define EXAMPLE_ADC1_CHAN1          ADC_CHANNEL_5
+#else
+#define EXAMPLE_ADC1_CHAN0          ADC_CHANNEL_2
+#define EXAMPLE_ADC1_CHAN1          ADC_CHANNEL_3
+#endif
+*/
+
+static adc_oneshot_unit_handle_t adc1_handle;
+
 static const char *TAG = "joystick";
 bool initJoystick()
 {
+    adc_oneshot_chan_cfg_t config = {
+        .atten = ADC_ATTEN_DB_12,
+        .bitwidth = ADC_BITWIDTH_DEFAULT,
+    };
+
+    adc_oneshot_unit_init_cfg_t init_config1 = {
+        .unit_id = ADC_UNIT_1,
+        .clk_src = ADC_RTC_CLK_SRC_DEFAULT,
+        .ulp_mode = ADC_ULP_MODE_DISABLE,
+    };
+    ESP_ERROR_CHECK(adc_oneshot_new_unit(&init_config1, &adc1_handle));
+
+    ESP_ERROR_CHECK(adc_oneshot_config_channel(adc1_handle, EXAMPLE_ADC1_CHAN0, &config));
+    ESP_ERROR_CHECK(adc_oneshot_config_channel(adc1_handle, EXAMPLE_ADC1_CHAN1, &config));
+
     esp_err_t ret;
-    ret = adc1_config_width(ADC_WIDTH_BIT_12);
-    if (ret != ESP_OK)
-    {
-        ESP_LOGE(TAG, "adc1_config_width failed (%s)", esp_err_to_name(ret));
-        return false;
-    }
-    ret = adc1_config_channel_atten(channel1, ADC_ATTEN_DB_11);
-    if (ret != ESP_OK)
-    {
-        ESP_LOGE(TAG, "adc1_config_channel_atten Failed (%s)", esp_err_to_name(ret));
-        return false;
-    }
-    ret = adc1_config_channel_atten(channel2, ADC_ATTEN_DB_11);
-    if (ret != ESP_OK)
-    {
-        ESP_LOGE(TAG, "adc1_config_channel_atten Failed (%s)", esp_err_to_name(ret));
-        return false;
+
+    const adc_channel_t channels[] = {
+        ADC_CHANNEL_0,
+        ADC_CHANNEL_1,
+        ADC_CHANNEL_2,
+        ADC_CHANNEL_3,
+        ADC_CHANNEL_4,
+        ADC_CHANNEL_5,
+        ADC_CHANNEL_6,
+        ADC_CHANNEL_7,
+    };
+
+    for (int i = 0; i < 8; ++i) {
+        const adc_channel_t & chan = channels[i];
+        int io_num;
+        ESP_ERROR_CHECK(adc_continuous_channel_to_io(ADC_UNIT_1, chan, &io_num));
+        ESP_LOGI(TAG, "ADC%d Channel[%d] Mapped to Pin: %d", ADC_UNIT_1 + 1, chan, io_num);
     }
 
     ret = gpio_set_direction(JOYSTICK_SW, GPIO_MODE_INPUT);
@@ -62,13 +84,16 @@ bool initJoystick()
 
 uint16_t readJoystick()
 {
-    uint32_t adc_vrx = 0;
-    uint32_t adc_vry = 0;
+    int adc_vrx = 0;
+    int adc_vry = 0;
     int button = gpio_get_level(JOYSTICK_SW);
     int a_button = gpio_get_level(JOYSTICK_A_BUTTON);
 
-    adc_vry = adc1_get_raw((adc1_channel_t)channel1);
-    adc_vrx = adc1_get_raw((adc1_channel_t)channel2);
+    ESP_ERROR_CHECK(adc_oneshot_read(adc1_handle, EXAMPLE_ADC1_CHAN0, &adc_vrx));
+    ESP_ERROR_CHECK(adc_oneshot_read(adc1_handle, EXAMPLE_ADC1_CHAN1, &adc_vry));
+    //ESP_LOGI(TAG, "ADC%d Channel[%d] Raw Data: %d", ADC_UNIT_1 + 1, EXAMPLE_ADC1_CHAN0, adc_vrx);
+    //ESP_LOGI(TAG, "ADC%d Channel[%d] Raw Data: %d", ADC_UNIT_1 + 1, EXAMPLE_ADC1_CHAN1, adc_vry);
+
     if (adc_vry == -1)
         return false;
     if (adc_vrx == -1)
@@ -76,7 +101,7 @@ uint16_t readJoystick()
 
     uint16_t joy = JOY_NONE;
 
-    if (adc_vry < 1800)
+    if (adc_vry < 50)
     {
         joy |= JOY_UP;
     }
@@ -85,7 +110,7 @@ uint16_t readJoystick()
         joy |= JOY_DOWN;
     }
 
-    if (adc_vrx < 1800)
+    if (adc_vrx < 50)
     {
         joy |= JOY_LEFT;
     }

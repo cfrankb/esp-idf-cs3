@@ -58,7 +58,7 @@ protected:
     static uint8_t m_keys[6];
 
     CActor m_player;
-    void clearAttr(u_int8_t attr);
+    void clearAttr(uint8_t attr);
 
     // monsters
     enum

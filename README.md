@@ -17,7 +17,7 @@ https://github.com/cfrankb/cs3-map-edit
 
 # Software required
 
-esp-idf v4.4 or later.
+esp-idf v5 or later.
 
 # Installation
 
@@ -69,6 +69,9 @@ https://www.aliexpress.com/item/32345829014.html
 | SW       | blue      | 26       |
 | GRN      | black     | GRN      |
 | VCC      | red       | 3.3v     |
+
+The above configuration is for the ESP32.
+Pin out will vary per model. Check log output.
 
 ## Dupont cables
 

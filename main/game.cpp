@@ -137,7 +137,7 @@ void CGame::consume()
     // trigger key
     int x = m_player.getX();
     int y = m_player.getY();
-    u_int8_t attr = map.getAttr(x, y);
+    uint8_t attr = map.getAttr(x, y);
     if (attr != 0)
     {
         map.setAttr(x, y, 0);
@@ -371,7 +371,7 @@ int CGame::findMonsterAt(int x, int y)
 
 void CGame::manageMonsters()
 {
-    u_int8_t dirs[] = {AIM_UP, AIM_DOWN, AIM_LEFT, AIM_RIGHT};
+    uint8_t dirs[] = {AIM_UP, AIM_DOWN, AIM_LEFT, AIM_RIGHT};
     std::vector<CActor> newMonsters;
 
     for (int i = 0; i < m_monsterCount; ++i)
@@ -417,7 +417,7 @@ void CGame::manageMonsters()
         }
         else if (def.type == TYPE_VAMPLANT)
         {
-            for (u_int8_t i = 0; i < sizeof(dirs); ++i)
+            for (uint8_t i = 0; i < sizeof(dirs); ++i)
             {
                 Pos p = CGame::translate(Pos{actor.getX(), actor.getY()}, dirs[i]);
                 uint8_t c = map.at(p.x, p.y);
@@ -530,7 +530,7 @@ bool CGame::goalCount()
     return m_diamonds;
 }
 
-void CGame::clearAttr(u_int8_t attr)
+void CGame::clearAttr(uint8_t attr)
 {
     for (int y = 0; y < map.hei(); ++y)
     {
