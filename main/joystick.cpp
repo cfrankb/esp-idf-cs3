@@ -5,6 +5,8 @@
 #include "driver/gpio.h"
 #include "esp_adc/adc_oneshot.h"
 #include "esp_adc/adc_continuous.h"
+#include "esp_idf_version.h"
+#include "soc/clk_tree_defs.h"
 #include <cstring>
 
 #define JOYSTICK_SW GPIO_NUM_26
@@ -27,10 +29,19 @@ static adc_oneshot_unit_handle_t adc1_handle;
 static const char *TAG = "joystick";
 bool initJoystick()
 {
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 3, 0)
+    // enable functionality present in IDF v4.0
     adc_oneshot_chan_cfg_t config = {
         .atten = ADC_ATTEN_DB_12,
         .bitwidth = ADC_BITWIDTH_DEFAULT,
     };
+#else
+    adc_oneshot_chan_cfg_t config = {
+        .atten = ADC_ATTEN_DB_11,
+        .bitwidth = ADC_BITWIDTH_DEFAULT,
+    };
+#endif
+
 
     adc_oneshot_unit_init_cfg_t init_config1 = {
         .unit_id = ADC_UNIT_1,

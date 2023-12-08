@@ -17,7 +17,7 @@ https://github.com/cfrankb/cs3-map-edit
 
 # Software required
 
-esp-idf v5 or later.
+esp-idf v5.1.2 or later.
 
 # Installation
 

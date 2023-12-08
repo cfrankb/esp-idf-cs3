@@ -104,7 +104,7 @@ extern "C" void app_main(void)
 
         uint16_t joy = readJoystick();
         if (!game.isGameOver()) {
-            if (game.goalCount() == 0 || joy & JOY_A_BUTTON)
+            if (game.goalCount() == 0 || (joy & JOY_A_BUTTON))
             {
                 game.nextLevel();
             }
