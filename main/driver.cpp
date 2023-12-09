@@ -77,6 +77,8 @@ void spi_master_init(TFT_t *dev, gpio_num_t GPIO_MOSI, gpio_num_t GPIO_SCLK, gpi
         .flags = 0,
         #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 3, 0)
         .isr_cpu_id = ESP_INTR_CPU_AFFINITY_AUTO,
+        #else
+        .isr_cpu_id = static_cast<intr_cpu_id_t>(0),
         #endif
         .intr_flags=0
     };

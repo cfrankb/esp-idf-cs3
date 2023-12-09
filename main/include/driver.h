@@ -1,8 +1,8 @@
 #ifndef __DRIVER_H___
 #define __DRIVER_H___
 #include <stdint.h>
-#include <driver/spi_master.h>
-#include <driver/gpio.h>
+#include "driver/spi_master.h"
+#include "driver/gpio.h"
 
 typedef struct
 {
