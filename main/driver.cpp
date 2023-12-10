@@ -84,7 +84,7 @@ void spi_master_init(TFT_t *dev, gpio_num_t GPIO_MOSI, gpio_num_t GPIO_SCLK, gpi
     };
 
     ret = spi_bus_initialize(HOST_ID, &buscfg, SPI_DMA_CH_AUTO);
-    ESP_LOGD(TAG, "spi_bus_initialize=%d", ret);
+    ESP_LOGI(TAG, "spi_bus_initialize=%d", ret);
     assert(ret == ESP_OK);
 
     spi_device_interface_config_t devcfg;
@@ -93,6 +93,8 @@ void spi_master_init(TFT_t *dev, gpio_num_t GPIO_MOSI, gpio_num_t GPIO_SCLK, gpi
     devcfg.queue_size = 7;
     devcfg.mode = 2;
     devcfg.flags = SPI_DEVICE_NO_DUMMY;
+
+    ESP_LOGI(TAG, "SPI_Frequency set to %d", SPI_Frequency);
 
     if (GPIO_CS >= 0)
     {
