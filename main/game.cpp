@@ -270,14 +270,9 @@ void CGame::drawScreen()
     uint16_t *tiledata;
     for (int y = 0; y < rows; ++y)
     {
-        if (y + my >= map.hei())
-        {
-            break;
-        }
-
         for (int x = 0; x < cols; ++x)
         {
-            int i = map.at(x + mx, y + my);
+            int i = y + my >= map.hei() ? TILES_BLANK: map.at(x + mx, y + my);
             if (i == TILES_ANNIE2)
             {
                 tiledata = playerTiles[m_player.getAim() * 4 + x % 3];
