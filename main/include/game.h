@@ -27,7 +27,7 @@ public:
     static CMap &getMap();
     void nextLevel();
     void restartLevel();
-    void restartGane();
+    void restartGame();
     void setMode(int mode);
     int mode() const;
     bool isPlayerDead();

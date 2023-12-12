@@ -134,7 +134,7 @@ bool CGame::loadLevel(bool restart)
 
     Pos pos = map.findFirst(TILES_ANNIE2);
     printf("Player at: %d %d\n", pos.x, pos.y);
-    m_player = CActor(pos, TYPE_PLAYER, CActor::AIM_DOWN);
+    m_player = CActor(pos, TYPE_PLAYER, AIM_DOWN);
     m_diamonds = map.count(TILES_DIAMOND);
     memset(m_keys, 0, sizeof(m_keys));
     m_health = DEFAULT_HEALTH;
@@ -193,7 +193,7 @@ int CGame::findMonsterAt(int x, int y)
 
 void CGame::manageMonsters()
 {
-    uint8_t dirs[] = {CActor::AIM_UP, CActor::AIM_DOWN, CActor::AIM_LEFT, CActor::AIM_RIGHT};
+    uint8_t dirs[] = {AIM_UP, AIM_DOWN, AIM_LEFT, AIM_RIGHT};
     std::vector<CActor> newMonsters;
 
     for (int i = 0; i < m_monsterCount; ++i)
@@ -210,7 +210,7 @@ void CGame::manageMonsters()
             }
 
             int aim = actor.findNextDir();
-            if (aim != CActor::AIM_NONE)
+            if (aim != AIM_NONE)
             {
                 actor.move(aim);
             }
@@ -218,9 +218,9 @@ void CGame::manageMonsters()
         else if (def.type == TYPE_DRONE)
         {
             int aim = actor.getAim();
-            if (aim < CActor::AIM_LEFT)
+            if (aim < AIM_LEFT)
             {
-                aim = CActor::AIM_LEFT;
+                aim = AIM_LEFT;
             }
             if (actor.isPlayerThere(actor.getAim()))
             {
@@ -279,10 +279,10 @@ void CGame::manageMonsters()
 void CGame::managePlayer()
 {
     uint16_t joy = readJoystick();
-    joy && ((joy & JOY_UP && move(CActor::AIM_UP)) ||
-            (joy & JOY_DOWN && move(CActor::AIM_DOWN)) ||
-            (joy & JOY_LEFT && move(CActor::AIM_LEFT)) ||
-            (joy & JOY_RIGHT && move(CActor::AIM_RIGHT)));
+    joy && ((joy & JOY_UP && move(AIM_UP)) ||
+            (joy & JOY_DOWN && move(AIM_DOWN)) ||
+            (joy & JOY_LEFT && move(AIM_LEFT)) ||
+            (joy & JOY_RIGHT && move(AIM_RIGHT)));
 }
 
 Pos CGame::translate(const Pos p, int aim)
@@ -291,25 +291,25 @@ Pos CGame::translate(const Pos p, int aim)
 
     switch (aim)
     {
-    case CActor::AIM_UP:
+    case AIM_UP:
         if (t.y > 0)
         {
             --t.y;
         }
         break;
-    case CActor::AIM_DOWN:
+    case AIM_DOWN:
         if (t.y < map.hei() - 1)
         {
             ++t.y;
         }
         break;
-    case CActor::AIM_LEFT:
+    case AIM_LEFT:
         if (t.x > 0)
         {
             --t.x;
         }
         break;
-    case CActor::AIM_RIGHT:
+    case AIM_RIGHT:
         if (t.x < map.len() - 1)
         {
             ++t.x;
@@ -411,7 +411,7 @@ bool CGame::isGameOver()
     return m_lives == 0;
 }
 
-void CGame::restartGane()
+void CGame::restartGame()
 {
     m_level = 0;
     m_score = 0;

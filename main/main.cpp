@@ -38,7 +38,7 @@ void drawScreenTask(void *pvParameter)
             vTaskDelay(2000 / portTICK_PERIOD_MS);
             if (game.mode() == CGame::MODE_GAMEOVER)
             {
-                game.restartGane();
+                game.restartGame();
             }
             else
             {

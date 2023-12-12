@@ -1,15 +1,14 @@
 #include "actor.h"
 #include "tilesdata.h"
 #include "game.h"
-#include "joystick.h"
 #include "sprtypes.h"
 #include <cstdio>
 
 uint8_t AIMS[] = {
-    CActor::AIM_DOWN, CActor::AIM_RIGHT, CActor::AIM_UP, CActor::AIM_LEFT,
-    CActor::AIM_UP, CActor::AIM_LEFT, CActor::AIM_DOWN, CActor::AIM_RIGHT,
-    CActor::AIM_RIGHT, CActor::AIM_UP, CActor::AIM_LEFT, CActor::AIM_DOWN,
-    CActor::AIM_LEFT, CActor::AIM_DOWN, CActor::AIM_RIGHT, CActor::AIM_UP};
+    AIM_DOWN, AIM_RIGHT, AIM_UP, AIM_LEFT,
+    AIM_UP, AIM_LEFT, AIM_DOWN, AIM_RIGHT,
+    AIM_RIGHT, AIM_UP, AIM_LEFT, AIM_DOWN,
+    AIM_LEFT, AIM_DOWN, AIM_RIGHT, AIM_UP};
 
 CActor::CActor(uint8_t x, uint8_t y, uint8_t type, uint8_t aim)
 {
@@ -36,8 +35,8 @@ CActor::~CActor()
 bool CActor::canMove(int aim)
 {
     CMap &map = CGame::getMap();
-    const Pos pos = Pos{m_x, m_y};
-    const Pos newPos = CGame::translate(pos, aim);
+    const Pos &pos = Pos{m_x, m_y};
+    const Pos &newPos = CGame::translate(pos, aim);
     if (pos.x == newPos.x && pos.y == newPos.y)
     {
         return false;
@@ -103,7 +102,7 @@ void CActor::setPU(const uint8_t c)
     m_pu = c;
 }
 
-void CActor::setXY(const Pos pos)
+void CActor::setXY(const Pos &pos)
 {
     m_x = pos.x;
     m_y = pos.y;
@@ -137,18 +136,23 @@ void CActor::setAim(const uint8_t aim)
 bool CActor::isPlayerThere(uint8_t aim)
 {
     const uint8_t c = tileAt(aim);
-    const TileDef def = getTileDef(c);
+    const TileDef &def = getTileDef(c);
     return def.type == TYPE_PLAYER;
 }
 
 uint8_t CActor::tileAt(uint8_t aim)
 {
     CMap &map = CGame::getMap();
-    const Pos p = CGame::translate(Pos{m_x, m_y}, aim);
+    const Pos &p = CGame::translate(Pos{m_x, m_y}, aim);
     return map.at(p.x, p.y);
 }
 
 void CActor::setType(const uint8_t type)
 {
     m_type = type;
+}
+
+bool CActor::within(int x1, int y1, int x2, int y2) const
+{
+    return (m_x >= x1) && (m_x < x2) && (m_y >= y1) && (m_y < y2);
 }
