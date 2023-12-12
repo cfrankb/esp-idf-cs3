@@ -14,15 +14,6 @@ enum JoyDir
     JOY_NONE = 0
 };
 
-enum JoyAim
-{
-    AIM_UP = 0,
-    AIM_DOWN = 1,
-    AIM_LEFT = 2,
-    AIM_RIGHT = 3,
-    AIM_NONE = -1
-};
-
 bool initJoystick();
 uint16_t readJoystick();
 

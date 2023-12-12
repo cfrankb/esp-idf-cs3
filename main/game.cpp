@@ -1,77 +1,25 @@
 #include <cstring>
-#include <mutex>
 #include <string>
 #include "game.h"
-#include "display.h"
-#include "esphelpers.h"
-#include "tileset.h"
 #include "map.h"
-#include "buffer.h"
 #include "joystick.h"
 #include "level.h"
 #include "actor.h"
 #include "sprtypes.h"
 #include "tilesdata.h"
-#include "animzdata.h"
-#include "font.h"
-#include "colors.h"
-#include "engine.h"
-
-std::mutex g_mutex;
-#define TILESIZE 16
-#define DMA_BUFFER_LIMIT 2048 // 4092
-//#define __SPEED_TEST__
 
 CMap map(30, 30);
-CFont font;
-CDisplay display;
-CTileSet tiles(TILESIZE, TILESIZE);
-CTileSet animzTiles(TILESIZE, TILESIZE);
-CTileSet playerTiles(TILESIZE, TILESIZE);
-CBuffer buffer(CONFIG_WIDTH, TILESIZE, DMA_BUFFER_LIMIT);
-
-typedef struct
-{
-    uint8_t srcTile;
-    uint8_t startSeq;
-    uint8_t count;
-    uint8_t index;
-} AnimzSeq;
-
-AnimzSeq animzSeq[] = {
-    {TILES_DIAMOND, ANIMZ_DIAMOND, 13, 0},
-    {TILES_INSECT1, ANIMZ_INSECT1, 2, 0},
-    {TILES_SWAMP, ANIMZ_SWAMP, 2, 0},
-    {TILES_ALPHA, ANIMZ_ALPHA, 2, 0},
-    {TILES_FORCEF94, ANIMZ_FORCEF94, 8, 0},
-    {TILES_VAMPLANT, ANIMZ_VAMPLANT, 2, 0},
-    {TILES_ORB, ANIMZ_ORB, 4, 0},
-    {TILES_TEDDY93, ANIMZ_TEDDY93, 2, 0},
-    {TILES_LUTIN, ANIMZ_LUTIN, 2, 0},
-    {TILES_OCTOPUS, ANIMZ_OCTOPUS, 2, 0},
-    {TILES_TRIFORCE, ANIMZ_TRIFORCE, 4, 0},
-    {TILES_YAHOO, ANIMZ_YAHOO, 2, 0},
-    {TILES_YIGA, ANIMZ_YIGA, 2, 0},
-    {TILES_YELKILLER, ANIMZ_YELKILLER, 2, 0},
-    {TILES_MANKA, ANIMZ_MANKA, 2, 0},
-    {TILES_MAXKILLER, ANIMZ_MAXKILLER, 2, 0},
-    {TILES_WHTEWORM, ANIMZ_WHTEWORM, 2, 0},
-};
-
-uint8_t tileReplacement[256];
 
 uint8_t CGame::m_keys[6];
 
 CGame::CGame()
 {
-    CTileSet::toggleFlipColors(true);
     m_monsterMax = MAX_MONSTERS;
     m_monsters = new CActor[m_monsterMax];
     m_monsterCount = 0;
     m_health = 0;
     m_lives = DEFAULT_LIVES;
     m_score = 0;
-    m_engine = new CEngine;
 }
 
 CGame::~CGame()
@@ -79,11 +27,6 @@ CGame::~CGame()
     if (m_monsters)
     {
         delete[] m_monsters;
-    }
-
-    if (m_engine)
-    {
-        delete m_engine;
     }
 }
 
@@ -145,23 +88,6 @@ void CGame::consume()
     }
 }
 
-bool CGame::init()
-{
-    initSpiffs();
-    initJoystick();
-    display.init();
-
-    tiles.read("/spiffs/tiles.mcz");
-    animzTiles.read("/spiffs/animz.mcz");
-    playerTiles.read("/spiffs/annie.mcz");
-
-    if (!font.read("/spiffs/font.bin"))
-    {
-        printf("failed to read font\n");
-    }
-    return true;
-}
-
 void CGame::nextLevel()
 {
     printf("nextLevel\n");
@@ -183,8 +109,8 @@ void CGame::restartLevel()
 bool CGame::loadLevel(bool restart)
 {
     printf("loading level: %d ...\n", m_level + 1);
-    std::lock_guard<std::mutex> lk(g_mutex);
-    setMode(restart ? MODE_RESTART :MODE_INTRO);
+    // std::lock_guard<std::mutex> lk(g_mutex);
+    setMode(restart ? MODE_RESTART : MODE_INTRO);
 
     char target[20];
     sprintf(target, "level%.2d", m_level + 1);
@@ -206,114 +132,15 @@ bool CGame::loadLevel(bool restart)
     }
     printf("level loaded\n");
 
-    memset(tileReplacement, NO_ANIMZ, sizeof(tileReplacement));
-
     Pos pos = map.findFirst(TILES_ANNIE2);
     printf("Player at: %d %d\n", pos.x, pos.y);
-    m_player = CActor(pos, TYPE_PLAYER, AIM_DOWN);
+    m_player = CActor(pos, TYPE_PLAYER, CActor::AIM_DOWN);
     m_diamonds = map.count(TILES_DIAMOND);
     memset(m_keys, 0, sizeof(m_keys));
     m_health = DEFAULT_HEALTH;
     findMonsters();
 
     return true;
-}
-
-void CGame::animate()
-{
-    for (int i = 0; i < sizeof(animzSeq) / sizeof(AnimzSeq); ++i)
-    {
-        AnimzSeq &seq = animzSeq[i];
-        int j = seq.srcTile;
-        tileReplacement[j] = seq.startSeq + seq.index;
-        seq.index = seq.index < seq.count - 1 ? seq.index + 1 : 0;
-    }
-}
-
-void CGame::drawLevelIntro()
-{
-    char t[32];
-    switch (m_mode)
-    {
-    case CGame::MODE_INTRO:
-        sprintf(t, "LEVEL %.2d", m_level + 1);
-    break;
-    case CGame::MODE_RESTART:
-        sprintf(t, "LIVES LEFT %.2d", m_lives);
-    break;
-    case CGame::MODE_GAMEOVER:
-        strcpy(t, "GAME OVER");
-    };
-
-    int x = (CONFIG_WIDTH - strlen(t) * 8) / 2;
-    int y = (CONFIG_HEIGHT - 8) / 2;
-    display.fill(BLACK);
-    buffer.fill(BLACK);
-    buffer.drawFont(x, 0, font, t, WHITE);
-    display.drawBuffer(0, y, buffer);
-}
-
-void CGame::drawScreen()
-{
-    std::lock_guard<std::mutex> lk(g_mutex);
-
-#ifdef __SPEED_TEST__
-    int64_t t0 = timer_gettime();
-#endif
-    const int cols = CONFIG_WIDTH / TILESIZE;
-    const int rows = CONFIG_HEIGHT / TILESIZE;
-    const int lmx = std::max(0, m_player.getX() - cols / 2);
-    const int lmy = std::max(0, m_player.getY() - rows / 2);
-    const int mx = std::min(lmx, map.len() > cols ? map.len() - cols : 0);
-    const int my = std::min(lmy, map.hei() > rows ? map.hei() - rows : 0);
-
-    uint16_t *tiledata;
-    for (int y = 0; y < rows; ++y)
-    {
-        for (int x = 0; x < cols; ++x)
-        {
-            int i = y + my >= map.hei() ? TILES_BLANK: map.at(x + mx, y + my);
-            if (i == TILES_ANNIE2)
-            {
-                tiledata = playerTiles[m_player.getAim() * 4 + x % 3];
-            }
-            else
-            {
-                if (i == TILES_STOP)
-                {
-                    i = TILES_BLANK;
-                }
-                int j = tileReplacement[i];
-                tiledata = j == NO_ANIMZ ? tiles[i] : animzTiles[j];
-            }
-            buffer.drawTile32(x * TILESIZE, 0, tiledata);
-        }
-        if (y == 0)
-        {
-            char tmp[32];
-            int bx = 0;
-            int offsetY = 0;
-            sprintf(tmp, "%.8d ", m_score);
-            buffer.drawFont(0, offsetY, font, tmp, WHITE);
-            bx += strlen(tmp);
-            sprintf(tmp, "DIAMONDS %.2d ", m_diamonds);
-            buffer.drawFont(bx * 8, offsetY, font, tmp, YELLOW);
-            bx += strlen(tmp);
-            sprintf(tmp, "LIVES %.2d ", m_lives);
-            buffer.drawFont(bx * 8, offsetY, font, tmp, PURPLE);
-        }
-        else if (y == rows - 1)
-        {
-            buffer.drawRect(
-                Rect{.x = 4, .y = 4, .width = std::min(m_health / 2, CONFIG_WIDTH - 4), .height = 8}, LIME);
-        }
-        display.drawBuffer(0, y * TILESIZE, buffer);
-    }
-
-#ifdef __SPEED_TEST__
-    int64_t t1 = timer_gettime();
-    printf("time: %ld\n", (long)(t1 - t0) / 1000);
-#endif
 }
 
 bool CGame::findMonsters()
@@ -366,7 +193,7 @@ int CGame::findMonsterAt(int x, int y)
 
 void CGame::manageMonsters()
 {
-    uint8_t dirs[] = {AIM_UP, AIM_DOWN, AIM_LEFT, AIM_RIGHT};
+    uint8_t dirs[] = {CActor::AIM_UP, CActor::AIM_DOWN, CActor::AIM_LEFT, CActor::AIM_RIGHT};
     std::vector<CActor> newMonsters;
 
     for (int i = 0; i < m_monsterCount; ++i)
@@ -383,7 +210,7 @@ void CGame::manageMonsters()
             }
 
             int aim = actor.findNextDir();
-            if (aim != AIM_NONE)
+            if (aim != CActor::AIM_NONE)
             {
                 actor.move(aim);
             }
@@ -391,9 +218,9 @@ void CGame::manageMonsters()
         else if (def.type == TYPE_DRONE)
         {
             int aim = actor.getAim();
-            if (aim < AIM_LEFT)
+            if (aim < CActor::AIM_LEFT)
             {
-                aim = AIM_LEFT;
+                aim = CActor::AIM_LEFT;
             }
             if (actor.isPlayerThere(actor.getAim()))
             {
@@ -443,7 +270,7 @@ void CGame::manageMonsters()
     }
 
     // moved here to avoid reallocation while using a reference
-    for (auto const & monster : newMonsters)
+    for (auto const &monster : newMonsters)
     {
         addMonster(monster);
     }
@@ -452,10 +279,10 @@ void CGame::manageMonsters()
 void CGame::managePlayer()
 {
     uint16_t joy = readJoystick();
-    joy && ((joy & JOY_UP && move(AIM_UP)) ||
-            (joy & JOY_DOWN && move(AIM_DOWN)) ||
-            (joy & JOY_LEFT && move(AIM_LEFT)) ||
-            (joy & JOY_RIGHT && move(AIM_RIGHT)));
+    joy && ((joy & JOY_UP && move(CActor::AIM_UP)) ||
+            (joy & JOY_DOWN && move(CActor::AIM_DOWN)) ||
+            (joy & JOY_LEFT && move(CActor::AIM_LEFT)) ||
+            (joy & JOY_RIGHT && move(CActor::AIM_RIGHT)));
 }
 
 Pos CGame::translate(const Pos p, int aim)
@@ -464,25 +291,25 @@ Pos CGame::translate(const Pos p, int aim)
 
     switch (aim)
     {
-    case AIM_UP:
+    case CActor::AIM_UP:
         if (t.y > 0)
         {
             --t.y;
         }
         break;
-    case AIM_DOWN:
+    case CActor::AIM_DOWN:
         if (t.y < map.hei() - 1)
         {
             ++t.y;
         }
         break;
-    case AIM_LEFT:
+    case CActor::AIM_LEFT:
         if (t.x > 0)
         {
             --t.x;
         }
         break;
-    case AIM_RIGHT:
+    case CActor::AIM_RIGHT:
         if (t.x < map.len() - 1)
         {
             ++t.x;
@@ -569,11 +396,6 @@ int CGame::mode() const
     return m_mode;
 };
 
-CEngine* CGame::getEngine()
-{
-    return m_engine;
-}
-
 bool CGame::isPlayerDead()
 {
     return m_health == 0;
@@ -581,7 +403,7 @@ bool CGame::isPlayerDead()
 
 void CGame::killPlayer()
 {
-    m_lives = m_lives ? m_lives -1 : 0;
+    m_lives = m_lives ? m_lives - 1 : 0;
 }
 
 bool CGame::isGameOver()
@@ -592,7 +414,42 @@ bool CGame::isGameOver()
 void CGame::restartGane()
 {
     m_level = 0;
-    m_score =0;
+    m_score = 0;
     m_lives = DEFAULT_LIVES;
     loadLevel(false);
+}
+
+CActor &CGame::player()
+{
+    return m_player;
+}
+
+int CGame::score()
+{
+    return m_score;
+}
+
+int CGame::lives()
+{
+    return m_lives;
+}
+
+int CGame::diamonds()
+{
+    return m_diamonds;
+}
+
+int CGame::health()
+{
+    return m_health;
+}
+
+int CGame::level()
+{
+    return m_level;
+}
+
+int CGame::mode()
+{
+    return m_mode;
 }

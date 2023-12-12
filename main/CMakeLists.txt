@@ -14,6 +14,8 @@ set(SOURCES
     colors.cpp
     driver.cpp
     engine.cpp
+ #   maparch.cpp
+ #   animator.cpp
 )
 
 idf_component_register(

@@ -6,10 +6,10 @@
 #include <cstdio>
 
 uint8_t AIMS[] = {
-    AIM_DOWN, AIM_RIGHT, AIM_UP, AIM_LEFT,
-    AIM_UP, AIM_LEFT, AIM_DOWN, AIM_RIGHT,
-    AIM_RIGHT, AIM_UP, AIM_LEFT, AIM_DOWN,
-    AIM_LEFT, AIM_DOWN, AIM_RIGHT, AIM_UP};
+    CActor::AIM_DOWN, CActor::AIM_RIGHT, CActor::AIM_UP, CActor::AIM_LEFT,
+    CActor::AIM_UP, CActor::AIM_LEFT, CActor::AIM_DOWN, CActor::AIM_RIGHT,
+    CActor::AIM_RIGHT, CActor::AIM_UP, CActor::AIM_LEFT, CActor::AIM_DOWN,
+    CActor::AIM_LEFT, CActor::AIM_DOWN, CActor::AIM_RIGHT, CActor::AIM_UP};
 
 CActor::CActor(uint8_t x, uint8_t y, uint8_t type, uint8_t aim)
 {

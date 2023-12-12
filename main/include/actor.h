@@ -24,6 +24,14 @@ public:
     bool isPlayerThere(uint8_t aim);
     uint8_t tileAt(uint8_t aim);
     void setType(const uint8_t type);
+    enum JoyAim
+    {
+        AIM_UP = 0,
+        AIM_DOWN = 1,
+        AIM_LEFT = 2,
+        AIM_RIGHT = 3,
+        AIM_NONE = -1
+    };
 
 protected:
     uint8_t m_x;

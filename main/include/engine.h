@@ -1,6 +1,10 @@
 #ifndef _engine__h
 #define _engine__h
 
+#include <mutex>
+
+class CGame;
+
 class CEngine
 {
 public:
@@ -8,6 +12,19 @@ public:
     ~CEngine();
 
     bool init();
+    std::mutex &mutex();
+    CGame &game();
+    void drawScreen();
+    void drawLevelIntro();
+    void animate();
+
+    enum
+    {
+        NO_ANIMZ = 255,
+    };
+
+protected:
+    CGame *m_game = nullptr;
 };
 
 #endif

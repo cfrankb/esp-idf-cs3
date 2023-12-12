@@ -13,10 +13,7 @@ public:
     CGame();
     ~CGame();
 
-    bool init();
     bool loadLevel(bool restart);
-    void drawScreen();
-    void drawLevelIntro();
     bool move(int dir);
     void manageMonsters();
     void managePlayer();
@@ -36,14 +33,21 @@ public:
     bool isPlayerDead();
     void killPlayer();
     bool isGameOver();
-    CEngine* getEngine();
+
+    CActor &player();
+    int score();
+    int lives();
+    int diamonds();
+    int health();
+    int level();
+    int mode();
 
     enum
     {
         MODE_INTRO = 0,
         MODE_LEVEL = 1,
         MODE_RESTART = 2,
-        MODE_GAMEOVER =3,
+        MODE_GAMEOVER = 3,
         DEFAULT_LIVES = 5,
         LEVEL_BONUS = 500
     };
@@ -65,7 +69,6 @@ protected:
     {
         MAX_MONSTERS = 128,
         GROWBY_MONSTERS = 64,
-        NO_ANIMZ = 255,
         MAX_HEALTH = 255,
         DEFAULT_HEALTH = 64,
     };

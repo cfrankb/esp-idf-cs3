@@ -22,30 +22,31 @@
 #include "engine.h"
 
 // static const char *TAG = "main";
-
-CGame game;
+CEngine *engine = nullptr;
 
 void drawScreenTask(void *pvParameter)
 {
+    CGame &game = engine->game();
     while (1)
     {
-        //CEngine *engine = game.getEngine();
-
         switch (game.mode())
         {
         case CGame::MODE_INTRO:
         case CGame::MODE_RESTART:
         case CGame::MODE_GAMEOVER:
-            game.drawLevelIntro();
+            engine->drawLevelIntro();
             vTaskDelay(2000 / portTICK_PERIOD_MS);
-            if (game.mode()== CGame::MODE_GAMEOVER) {
+            if (game.mode() == CGame::MODE_GAMEOVER)
+            {
                 game.restartGane();
-            } else {
+            }
+            else
+            {
                 game.setMode(CGame::MODE_LEVEL);
             }
             break;
         case CGame::MODE_LEVEL:
-            game.drawScreen();
+            engine->drawScreen();
         }
 
         vTaskDelay(20 / portTICK_PERIOD_MS);
@@ -54,11 +55,15 @@ void drawScreenTask(void *pvParameter)
 
 extern "C" void app_main(void)
 {
+    engine = new CEngine();
+    CGame &game = engine->game();
+
     uint32_t before_free = esp_get_free_heap_size();
     printf("free bytes: %ld\n", before_free);
 
-    game.init();
+    engine->mutex().lock();
     game.loadLevel(false);
+    engine->mutex().unlock();
 
     TaskHandle_t xHandle = NULL;
     BaseType_t xReturned = xTaskCreate(&drawScreenTask, "drawScreen", 2048, NULL, 5, &xHandle);
@@ -82,7 +87,7 @@ extern "C" void app_main(void)
 
         if (ticks % 3 == 0)
         {
-            game.animate();
+            engine->animate();
         }
 
         if (ticks % 4 == 0)
@@ -90,12 +95,18 @@ extern "C" void app_main(void)
             game.manageMonsters();
         }
 
-        if (game.isPlayerDead()){
+        if (game.isPlayerDead())
+        {
             game.killPlayer();
             vTaskDelay(500 / portTICK_PERIOD_MS);
-            if(!game.isGameOver()) {
+            if (!game.isGameOver())
+            {
+                engine->mutex().lock();
                 game.restartLevel();
-            } else {
+                engine->mutex().unlock();
+            }
+            else
+            {
                 game.setMode(CGame::MODE_GAMEOVER);
             }
         }
@@ -103,10 +114,13 @@ extern "C" void app_main(void)
         ++ticks;
 
         uint16_t joy = readJoystick();
-        if (!game.isGameOver()) {
+        if (!game.isGameOver())
+        {
             if (game.goalCount() == 0 || (joy & JOY_A_BUTTON))
             {
+                engine->mutex().lock();
                 game.nextLevel();
+                engine->mutex().unlock();
             }
         }
     }
