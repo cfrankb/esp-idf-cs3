@@ -181,3 +181,57 @@ menu "TFT Configuration"
 	endchoice
 
 endmenu
+
+menu "Joystick Configuration"
+
+	config X_AXIS
+		int "X-Axis ADC channel"
+		range 0 7
+		default 7 if IDF_TARGET_ESP32
+		default 0 if IDF_TARGET_ESP32S2
+		default 0 if IDF_TARGET_ESP32S3
+		default 0 if IDF_TARGET_ESP32C3
+		help
+			Joystick ADC channel for the X Axis
+
+	config Y_AXIS
+		int "Y-Axis ADC channel"
+		range 0 7
+		default 6 if IDF_TARGET_ESP32
+		default 1 if IDF_TARGET_ESP32S2
+		default 1 if IDF_TARGET_ESP32S3
+		default 1 if IDF_TARGET_ESP32C3
+		help
+			Joystick ADC channel for the Y Axis
+
+	choice REVERSE_X_AXIS
+		prompt "Reverse X-Axis"
+		default REVERSE_X_AXIS_FALSE
+		help
+			Reverse X-Axis.
+		config REVERSE_X_AXIS_TRUE
+			bool "TRUE"
+			help
+				Flip the X-Axis
+		config REVERSE_X_AXIS_FALSE
+			bool "FALSE"
+			help
+				Don't Flip the X-Axis
+	endchoice
+
+	choice REVERSE_Y_AXIS
+		prompt "Reverse Y-Axis"
+		default REVERSE_Y_AXIS_FALSE
+		help
+			Reverse Y-Axis.
+		config REVERSE_Y_AXIS_TRUE
+			bool "TRUE"
+			help
+				Flip the Y-Axis
+		config REVERSE_Y_AXIS_FALSE
+			bool "FALSE"
+			help
+				Don't Flip the Y-Axis
+	endchoice
+
+endmenu

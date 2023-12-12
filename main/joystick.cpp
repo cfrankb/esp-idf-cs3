@@ -10,30 +10,15 @@
 #include <cstring>
 
 #define DEBUG_JOYSTICK
-//#define ENABLED_BUTTONS
-#ifdef ENABLED_BUTTONS
-#define JOYSTICK_SW GPIO_NUM_26
-#define JOYSTICK_A_BUTTON GPIO_NUM_4
-#endif
 
-#define EXAMPLE_ADC1_CHAN0          ADC_CHANNEL_7       // pin 35 (x) BROWN
-#define EXAMPLE_ADC1_CHAN1          ADC_CHANNEL_6       // pin 34 (y) WHITE
-
-/*#if CONFIG_IDF_TARGET_ESP32
-#define EXAMPLE_ADC1_CHAN0          ADC_CHANNEL_4
-#define EXAMPLE_ADC1_CHAN1          ADC_CHANNEL_5
-#else
-#define EXAMPLE_ADC1_CHAN0          ADC_CHANNEL_2
-#define EXAMPLE_ADC1_CHAN1          ADC_CHANNEL_3
-#endif
-*/
-
+const adc_channel_t ADC_CHANX = static_cast<adc_channel_t>(CONFIG_X_AXIS);
+const adc_channel_t ADC_CHANY = static_cast<adc_channel_t>(CONFIG_Y_AXIS);
 static adc_oneshot_unit_handle_t adc1_handle;
 
 static const char *TAG = "joystick";
 bool initJoystick()
 {
-ESP_LOGI(TAG, "initJoystick(): started");
+    ESP_LOGI(TAG, "initJoystick(): started");
 
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 3, 0)
     // enable functionality present in IDF v5.3
@@ -55,8 +40,8 @@ ESP_LOGI(TAG, "initJoystick(): started");
     };
     ESP_ERROR_CHECK(adc_oneshot_new_unit(&init_config1, &adc1_handle));
 
-    ESP_ERROR_CHECK(adc_oneshot_config_channel(adc1_handle, EXAMPLE_ADC1_CHAN0, &config));
-    ESP_ERROR_CHECK(adc_oneshot_config_channel(adc1_handle, EXAMPLE_ADC1_CHAN1, &config));
+    ESP_ERROR_CHECK(adc_oneshot_config_channel(adc1_handle, ADC_CHANX, &config));
+    ESP_ERROR_CHECK(adc_oneshot_config_channel(adc1_handle, ADC_CHANY, &config));
 
 #ifdef DEBUG_JOYSTICK
     const adc_channel_t channels[] = {
@@ -70,35 +55,15 @@ ESP_LOGI(TAG, "initJoystick(): started");
         ADC_CHANNEL_7,
     };
 
-    for (int i = 0; i < 8; ++i) {
-        const adc_channel_t & chan = channels[i];
+    for (int i = 0; i < 8; ++i)
+    {
+        const adc_channel_t &chan = channels[i];
         int io_num;
         ESP_ERROR_CHECK(adc_continuous_channel_to_io(ADC_UNIT_1, chan, &io_num));
         ESP_LOGI(TAG, "ADC%d Channel[%d] Mapped to Pin: %d", ADC_UNIT_1 + 1, chan, io_num);
     }
 #endif
 
-#ifdef ENABLED_BUTTONS
-    esp_err_t ret;
-
-    ret = gpio_set_direction(JOYSTICK_SW, GPIO_MODE_INPUT);
-    if (ret != ESP_OK)
-    {
-        ESP_LOGE(TAG, "gpio_set_direction Failed (%s)", esp_err_to_name(ret));
-    }
-
-    ret = gpio_set_direction(JOYSTICK_A_BUTTON, GPIO_MODE_INPUT);
-    if (ret != ESP_OK)
-    {
-        ESP_LOGE(TAG, "gpio_set_direction Failed (%s)", esp_err_to_name(ret));
-    }
-
-    ret = gpio_set_pull_mode(JOYSTICK_SW, GPIO_PULLUP_ONLY);
-    if (ret != ESP_OK)
-    {
-        ESP_LOGE(TAG, "gpio_set_pull_mode Failed (%s)", esp_err_to_name(ret));
-    }
-#endif
     ESP_LOGI(TAG, "initJoystick(): ended");
     return true;
 }
@@ -108,8 +73,8 @@ uint16_t readJoystick()
     int adc_vrx = 0;
     int adc_vry = 0;
 
-    ESP_ERROR_CHECK(adc_oneshot_read(adc1_handle, EXAMPLE_ADC1_CHAN0, &adc_vrx));
-    ESP_ERROR_CHECK(adc_oneshot_read(adc1_handle, EXAMPLE_ADC1_CHAN1, &adc_vry));
+    ESP_ERROR_CHECK(adc_oneshot_read(adc1_handle, ADC_CHANX, &adc_vrx));
+    ESP_ERROR_CHECK(adc_oneshot_read(adc1_handle, ADC_CHANY, &adc_vry));
 
     if (adc_vry == -1)
         return false;
@@ -118,41 +83,39 @@ uint16_t readJoystick()
 
     uint16_t joy = JOY_NONE;
 
+#ifdef CONFIG_REVERSE_Y_AXIS_TRUE
+    int flipY = JOY_UP | JOY_DOWN;
+#else
+    int flipY = 0;
+#endif
+
     if (adc_vry < 50)
     {
-        joy |= JOY_UP;
+        joy |= (JOY_DOWN ^ flipY);
     }
     else if (adc_vry > 3000)
     {
-        joy |= JOY_DOWN;
+        joy |= (JOY_UP ^ flipY);
     }
+
+#ifdef CONFIG_REVERSE_X_AXIS_TRUE
+    int flipX = JOY_LEFT | JOY_RIGHT;
+#else
+    int flipX = 0;
+#endif
 
     if (adc_vrx < 50)
     {
-        joy |= JOY_LEFT;
+        joy |= (JOY_LEFT ^ flipX);
     }
     else if (adc_vrx > 3000)
     {
-        joy |= JOY_RIGHT;
+        joy |= (JOY_RIGHT ^ flipX);
     }
-
-#ifdef ENABLED_BUTTONS
-    int button = gpio_get_level(JOYSTICK_SW);
-    int a_button = gpio_get_level(JOYSTICK_A_BUTTON);
-    if (!button)
-    {
-        joy |= JOY_BUTTON;
-    }
-
-    if (a_button)
-    {
-        joy |= JOY_A_BUTTON;
-    }
-#endif
 
 #ifdef DEBUG_JOYSTICK
-    ESP_LOGI(TAG, "ADC%d Channel[%d] Raw Data: %d", ADC_UNIT_1 + 1, EXAMPLE_ADC1_CHAN0, adc_vrx);
-    ESP_LOGI(TAG, "ADC%d Channel[%d] Raw Data: %d", ADC_UNIT_1 + 1, EXAMPLE_ADC1_CHAN1, adc_vry);
+    ESP_LOGI(TAG, "ADC%d Channel[%d] Raw Data: %d", ADC_UNIT_1 + 1, ADC_CHANX, adc_vrx);
+    ESP_LOGI(TAG, "ADC%d Channel[%d] Raw Data: %d", ADC_UNIT_1 + 1, ADC_CHANY, adc_vry);
     if (joy)
     {
         printf("Knob at X:[%d] Y:[%d] [%d]\n", adc_vrx, adc_vry, joy);
