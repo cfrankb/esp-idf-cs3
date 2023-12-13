@@ -11,7 +11,6 @@ public:
     CEngine();
     ~CEngine();
 
-    bool init();
     std::mutex &mutex();
     CGame &game();
     void drawScreen();
@@ -25,6 +24,7 @@ public:
 
 protected:
     CGame *m_game = nullptr;
+    bool init();
 };
 
 #endif

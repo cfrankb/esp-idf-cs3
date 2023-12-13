@@ -9,7 +9,7 @@
 #include "soc/clk_tree_defs.h"
 #include <cstring>
 
-#define DEBUG_JOYSTICK
+// #define DEBUG_JOYSTICK
 
 const adc_channel_t ADC_CHANX = static_cast<adc_channel_t>(CONFIG_X_AXIS);
 const adc_channel_t ADC_CHANY = static_cast<adc_channel_t>(CONFIG_Y_AXIS);

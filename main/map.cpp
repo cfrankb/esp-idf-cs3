@@ -112,25 +112,32 @@ bool CMap::read(FILE *sfile)
         uint16_t hei = 0;
         fread(&len, sizeof(uint8_t), 1, sfile);
         fread(&hei, sizeof(uint8_t), 1, sfile);
-        len = len ? len : MAX_SIZE;
-        hei = hei ? hei : MAX_SIZE;
-        resize(len, hei, true);
-        fread(m_map, len * hei, 1, sfile);
-        m_attrs.clear();
-        uint16_t attrCount = 0;
-        fread(&attrCount, sizeof(attrCount), 1, sfile);
-        for (int i = 0; i < attrCount; ++i)
-        {
-            uint8_t x;
-            uint8_t y;
-            uint8_t a;
-            fread(&x, sizeof(x), 1, sfile);
-            fread(&y, sizeof(y), 1, sfile);
-            fread(&a, sizeof(a), 1, sfile);
-            setAttr(x, y, a);
-        }
+        fromStream(sfile, len, hei);
     }
     return sfile != nullptr;
+}
+
+bool CMap::fromStream(FILE *sfile, uint16_t len, uint16_t hei)
+{
+    len = len ? len : MAX_SIZE;
+    hei = hei ? hei : MAX_SIZE;
+    resize(len, hei, true);
+    fread(m_map, len * hei, 1, sfile);
+    m_attrs.clear();
+    uint16_t attrCount = 0;
+    fread(&attrCount, sizeof(attrCount), 1, sfile);
+    for (int i = 0; i < attrCount; ++i)
+    {
+        uint8_t x;
+        uint8_t y;
+        uint8_t a;
+        fread(&x, sizeof(x), 1, sfile);
+        fread(&y, sizeof(y), 1, sfile);
+        fread(&a, sizeof(a), 1, sfile);
+        setAttr(x, y, a);
+    }
+
+    return true;
 }
 
 bool CMap::fromMemory(uint8_t *mem)

@@ -37,12 +37,18 @@ public:
     void setAttr(const uint8_t x, const uint8_t y, const uint8_t a);
     int size();
     const char *lastError();
-    CMap &operator=( const CMap & map);
+    CMap &operator=(const CMap &map);
     bool fromMemory(uint8_t *mem);
+    bool fromStream(FILE *sfile, uint16_t len, uint16_t hei);
 
-    enum:uint16_t {
-        UP, DOWN, LEFT, RIGHT, MAX = RIGHT,
-        NOT_FOUND=0xffff
+    enum : uint16_t
+    {
+        UP,
+        DOWN,
+        LEFT,
+        RIGHT,
+        MAX = RIGHT,
+        NOT_FOUND = 0xffff
     };
     void shift(int aim);
     void debug();

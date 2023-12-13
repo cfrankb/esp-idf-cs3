@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include "actor.h"
 #include "map.h"
+#include "maparch.h"
 
 class CMap;
 class CEngine;
@@ -41,6 +42,8 @@ public:
     int health();
     int level();
     int mode();
+    bool loadMapIndex(const char *filename);
+    std::string m_mapFile;
 
     enum
     {
@@ -53,6 +56,7 @@ public:
     };
 
 protected:
+    IndexVector m_arch;
     int m_lives = 0;
     int m_health = 0;
     int m_level = 0;

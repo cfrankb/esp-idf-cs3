@@ -109,27 +109,41 @@ void CGame::restartLevel()
 bool CGame::loadLevel(bool restart)
 {
     printf("loading level: %d ...\n", m_level + 1);
-    // std::lock_guard<std::mutex> lk(g_mutex);
     setMode(restart ? MODE_RESTART : MODE_INTRO);
 
-    char target[20];
-    sprintf(target, "level%.2d", m_level + 1);
-    std::string fname = findLevel(target);
-    if (fname[0] == '\0')
+    FILE *sfile = fopen(m_mapFile.c_str(), "rb");
+    if (!sfile)
     {
-        // no level found
+        printf("can't read %s", m_mapFile.c_str());
         return false;
     }
-    const char *path = "spiffs";
-    char fpath[strlen(path) + fname.length() + 5];
-    sprintf(fpath, "/%s/%s", path, fname.c_str());
-    std::string error;
-    if (!fetchLevel(map, fpath, error))
+
+    printf("file opened\n");
+    printf("levels: %d\n", m_arch.size());
+
+    int i = m_level % m_arch.size();
+    printf("offset: %ld\n", m_arch[i]);
+    if (fseek(sfile, m_arch[i], SEEK_SET) != 0)
     {
-        printf("error: %s\n", error.c_str());
-        // unable to load level
+        printf("can't seek %s to level %d", m_mapFile.c_str(), i + 1);
         return false;
     }
+
+    typedef struct
+    {
+        uint8_t head[4];
+        uint16_t version;
+        uint8_t len;
+        uint8_t hei;
+    } header_t;
+    header_t header;
+
+    // TODO: check header
+    fread(&header, sizeof(header_t), 1, sfile);
+    printf("len: %d hei:%d\n", header.len, header.hei);
+    map.fromStream(sfile, header.len, header.hei);
+    fclose(sfile);
+
     printf("level loaded\n");
 
     Pos pos = map.findFirst(TILES_ANNIE2);
@@ -452,4 +466,16 @@ int CGame::level()
 int CGame::mode()
 {
     return m_mode;
+}
+
+bool CGame::loadMapIndex(const char *filename)
+{
+    printf("getting mapIndex\n");
+    m_mapFile = filename;
+    if (!CMapArch::indexFromFile(filename, m_arch))
+    {
+        printf("failed to get mapIndex from %s\n", filename);
+        return false;
+    }
+    return true;
 }

@@ -13,6 +13,7 @@
 #include "tilesdata.h"
 #include "joystick.h"
 #include "animzdata.h"
+#include "maparch.h"
 
 #define TILESIZE 16
 #define DMA_BUFFER_LIMIT 2048 // 4092
@@ -57,7 +58,6 @@ AnimzSeq animzSeq[] = {
 
 CEngine::CEngine()
 {
-    m_game = new CGame();
     init();
 }
 
@@ -164,11 +164,14 @@ void CEngine::drawScreen()
 
 bool CEngine::init()
 {
+    m_game = new CGame();
+
     CTileSet::toggleFlipColors(true);
     initSpiffs();
     initJoystick();
     display.init();
     memset(tileReplacement, NO_ANIMZ, sizeof(tileReplacement));
+    m_game->loadMapIndex("/spiffs/levels.mapz");
 
     tiles.read("/spiffs/tiles.mcz");
     animzTiles.read("/spiffs/animz.mcz");
@@ -177,6 +180,7 @@ bool CEngine::init()
     if (!font.read("/spiffs/font.bin"))
     {
         printf("failed to read font\n");
+        return false;
     }
 
     return true;
