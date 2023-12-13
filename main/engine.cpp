@@ -80,6 +80,22 @@ void CEngine::drawLevelIntro()
     display.drawBuffer(0, y, buffer);
 }
 
+void CEngine::drawKeys()
+{
+    CGame &game = *m_game;
+    int x = CONFIG_WIDTH - TILE_SIZE;
+    const uint8_t *keys = game.keys();
+    for (int i = 0; i < 6; ++i)
+    {
+        uint8_t k = keys[i];
+        if (k)
+        {
+            buffer.drawTile(x, 0, reinterpret_cast<uint16_t *>(tiles[k]), true);
+            x -= TILE_SIZE;
+        }
+    }
+}
+
 void CEngine::drawScreen()
 {
     std::lock_guard<std::mutex> lk(g_mutex);
@@ -156,8 +172,19 @@ void CEngine::drawScreen()
         }
         else if (y == rows - 1)
         {
+            // draw bottom rect
             buffer.drawRect(
-                Rect{.x = 4, .y = 4, .width = std::min(m_game->health() / 2, CONFIG_WIDTH - 4), .height = 8}, LIME);
+                Rect{.x = 0, .y = 0, .width = CONFIG_WIDTH, .height = TILE_SIZE}, GRAY, true);
+            buffer.drawRect(
+                Rect{.x = 0, .y = 0, .width = CONFIG_WIDTH, .height = TILE_SIZE}, LIGHTGRAY, false);
+
+            // draw health bar
+            buffer.drawRect(
+                Rect{.x = 4, .y = 4, .width = std::min(m_game->health() / 2, CONFIG_WIDTH - 4), .height = TILE_SIZE / 2}, LIME, true);
+            buffer.drawRect(
+                Rect{.x = 4, .y = 4, .width = std::min(m_game->health() / 2, CONFIG_WIDTH - 4), .height = TILE_SIZE / 2}, WHITE, false);
+
+            drawKeys();
         }
         display.drawBuffer(0, y * TILESIZE, buffer);
     }

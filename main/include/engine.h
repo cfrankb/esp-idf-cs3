@@ -20,6 +20,7 @@ public:
 
     enum
     {
+        TILE_SIZE = 16,
         PLAYER_FRAMES = 8,
         NO_ANIMZ = 255,
     };
@@ -31,6 +32,7 @@ protected:
     int m_healthRef = 0;
     CGame *m_game = nullptr;
     bool init();
+    void drawKeys();
 };
 
 #endif

@@ -50,18 +50,17 @@ void CBuffer::drawTile32(const int x, const int y, uint16_t *tile)
     }
 }
 
-void CBuffer::drawTile(int x, int y, uint16_t *tile)
+void CBuffer::drawTile(int x, int y, uint16_t *tile, bool alpha)
 {
     uint16_t *o = m_buffer + x + y * m_len;
-
     for (int yy = 0; yy < 16; ++yy)
     {
         for (int xx = 0; xx < 16; ++xx)
         {
-            uint8_t *d = reinterpret_cast<uint8_t *>(o + xx);
-            d[0] = tile[0] >> 8;
-            d[1] = tile[0] & 0xff;
-            // o[xx] = *tile;
+            if (tile[0] || !alpha)
+            {
+                o[xx] = *tile;
+            }
             ++tile;
         }
         o += m_len;
@@ -131,16 +130,38 @@ void CBuffer::drawFont(int x, int y, CFont &font, const char *s, uint16_t color)
     }
 }
 
-void CBuffer::drawRect(const Rect &rect, uint16_t color)
+void CBuffer::drawRect(const Rect &rect, uint16_t color, bool fill)
 {
     const uint16_t fcolor = flipColor(color);
     uint16_t *buf = m_buffer + rect.x + rect.y * m_len;
-    for (int y = 0; y < rect.height; ++y)
+    if (fill)
     {
-        for (int x = 0; x < rect.width; ++x)
+        for (int y = 0; y < rect.height; ++y)
         {
-            buf[x] = fcolor;
+            for (int x = 0; x < rect.width; ++x)
+            {
+                buf[x] = fcolor;
+            }
+            buf += m_len;
         }
-        buf += m_len;
+    }
+    else
+    {
+        for (int y = 0; y < rect.height; ++y)
+        {
+            if (y == 0 || y == rect.height - 1)
+            {
+                for (int x = 0; x < rect.width; ++x)
+                {
+                    buf[x] = fcolor;
+                }
+            }
+            else
+            {
+                buf[0] = fcolor;
+                buf[rect.width - 1] = fcolor;
+            }
+            buf += m_len;
+        }
     }
 }

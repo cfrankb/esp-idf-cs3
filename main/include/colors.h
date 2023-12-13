@@ -4,6 +4,7 @@
 uint16_t rgb888torgb565(uint8_t *rgb888Pixel);
 uint16_t rgb888torgb565(uint8_t red, uint8_t green, uint8_t blue);
 uint16_t flipColor(const uint16_t c);
+#define rgb565 rgb888torgb565
 
 #define RED 0xf800
 #define GREEN 0x07e0
@@ -15,4 +16,5 @@ uint16_t flipColor(const uint16_t c);
 #define CYAN 0x07FF
 #define PURPLE 0xF81F
 #define LIME 0x0f0f
+#define LIGHTGRAY rgb565(0xa9, 0xa9, 0xa9)
 #endif

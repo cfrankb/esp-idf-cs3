@@ -20,10 +20,10 @@ public:
 
     int len();
     int hei();
-    void drawTile(int x, int y, uint16_t *tile);
+    void drawTile(int x, int y, uint16_t *tile, bool alpha);
     void drawTile32(const int x, const int y, uint16_t *tile);
     void drawFont(int x, int y, CFont &font, const char *s, uint16_t color = 0xffff);
-    void drawRect(const Rect &rect, uint16_t color = 0xffff);
+    void drawRect(const Rect &rect, uint16_t color = 0xffff, bool fill = true);
     uint16_t *buffer();
 
     uint16_t *start(int &hei, int &len);
