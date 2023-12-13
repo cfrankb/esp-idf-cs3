@@ -75,26 +75,7 @@ extern "C" void app_main(void)
     {
         vTaskDelay(40 / portTICK_PERIOD_MS);
 
-        if (game.mode() != CGame::MODE_LEVEL)
-        {
-            continue;
-        }
-
-        if (ticks % 3 == 0 && !game.isPlayerDead())
-        {
-            game.managePlayer();
-        }
-
-        if (ticks % 3 == 0)
-        {
-            engine->animate();
-        }
-
-        if (ticks % 4 == 0)
-        {
-            game.manageMonsters();
-        }
-
+        engine->mainLoop(ticks);
         if (game.isPlayerDead())
         {
             game.killPlayer();
@@ -112,17 +93,6 @@ extern "C" void app_main(void)
         }
 
         ++ticks;
-
-        uint16_t joy = readJoystick();
-        if (!game.isGameOver())
-        {
-            if (game.goalCount() == 0 || (joy & JOY_A_BUTTON))
-            {
-                engine->mutex().lock();
-                game.nextLevel();
-                engine->mutex().unlock();
-            }
-        }
     }
 
     // All done, unmount partition and disable SPIFFS

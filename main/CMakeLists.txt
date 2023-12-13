@@ -15,7 +15,7 @@ set(SOURCES
     driver.cpp
     engine.cpp
     maparch.cpp
- #   animator.cpp
+    animator.cpp
 )
 
 idf_component_register(

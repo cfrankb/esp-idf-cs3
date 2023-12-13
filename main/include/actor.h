@@ -9,7 +9,8 @@ enum JoyAim
     AIM_DOWN = 1,
     AIM_LEFT = 2,
     AIM_RIGHT = 3,
-    AIM_NONE = -1
+    AIM_NONE = -1,
+    AIM_COUNT = 4
 };
 
 class CActor

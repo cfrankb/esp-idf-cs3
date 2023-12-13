@@ -2,6 +2,7 @@
 #include <cstring>
 #include <string>
 #include <stdint.h>
+#include "freertos/FreeRTOS.h"
 #include "engine.h"
 #include "game.h"
 #include "colors.h"
@@ -14,6 +15,7 @@
 #include "joystick.h"
 #include "animzdata.h"
 #include "maparch.h"
+#include "animator.h"
 
 #define TILESIZE 16
 #define DMA_BUFFER_LIMIT 2048 // 4092
@@ -25,7 +27,7 @@ CDisplay display;
 CTileSet tiles(TILESIZE, TILESIZE);
 CTileSet animzTiles(TILESIZE, TILESIZE);
 CTileSet playerTiles(TILESIZE, TILESIZE);
-uint8_t tileReplacement[256];
+// uint8_t tileReplacement[256];
 std::mutex g_mutex;
 
 typedef struct
@@ -53,7 +55,7 @@ AnimzSeq animzSeq[] = {
     {TILES_YELKILLER, ANIMZ_YELKILLER, 2, 0},
     {TILES_MANKA, ANIMZ_MANKA, 2, 0},
     {TILES_MAXKILLER, ANIMZ_MAXKILLER, 2, 0},
-    {TILES_WHTEWORM, ANIMZ_WHTEWORM, 2, 0},
+    // {TILES_WHTEWORM, ANIMZ_WHTEWORM, 2, 0},
 };
 
 CEngine::CEngine()
@@ -113,6 +115,10 @@ void CEngine::drawScreen()
     const int mx = std::min(lmx, map.len() > cols ? map.len() - cols : 0);
     const int my = std::min(lmy, map.hei() > rows ? map.hei() - rows : 0);
 
+    CActor *monsters;
+    int count;
+    m_game->getMonsters(monsters, count);
+
     uint16_t *tiledata;
     for (int y = 0; y < rows; ++y)
     {
@@ -121,7 +127,7 @@ void CEngine::drawScreen()
             int i = y + my >= map.hei() ? TILES_BLANK : map.at(x + mx, y + my);
             if (i == TILES_ANNIE2)
             {
-                tiledata = playerTiles[player.getAim() * 4 + x % 3];
+                tiledata = reinterpret_cast<uint16_t *>(playerTiles[player.getAim() * PLAYER_FRAMES + m_playerFrameOffset]);
             }
             else
             {
@@ -129,11 +135,30 @@ void CEngine::drawScreen()
                 {
                     i = TILES_BLANK;
                 }
-                int j = tileReplacement[i];
-                tiledata = j == NO_ANIMZ ? tiles[i] : animzTiles[j];
+                int j = m_animator->at(i);
+                tiledata = j == NO_ANIMZ ? reinterpret_cast<uint16_t *>(tiles[i]) : reinterpret_cast<uint16_t *>(animzTiles[j]);
             }
             buffer.drawTile32(x * TILESIZE, 0, tiledata);
         }
+
+        const int offset = m_animator->offset() & 7;
+        for (int i = 0; i < count; ++i)
+        {
+            const CActor &monster = monsters[i];
+            if (monster.within(mx, my + y, mx + cols, my + y + 1))
+            {
+                const uint8_t tileID = map.at(monster.getX(), monster.getY());
+                if (!m_animator->isSpecialCase(tileID))
+                {
+                    continue;
+                }
+                // special case animations
+                const int xx = monster.getX() - mx;
+                tiledata = reinterpret_cast<uint16_t *>(animzTiles[monster.getAim() * 8 + ANIMZ_INSECT1 + offset]);
+                buffer.drawTile32(xx * TILESIZE, 0, tiledata);
+            }
+        }
+
         if (y == 0)
         {
             char tmp[32];
@@ -166,16 +191,17 @@ bool CEngine::init()
 {
     m_game = new CGame();
 
-    CTileSet::toggleFlipColors(true);
     initSpiffs();
     initJoystick();
     display.init();
-    memset(tileReplacement, NO_ANIMZ, sizeof(tileReplacement));
+    // memset(tileReplacement, NO_ANIMZ, sizeof(tileReplacement));
+    m_animator = new CAnimator();
+
     m_game->loadMapIndex("/spiffs/levels.mapz");
 
-    tiles.read("/spiffs/tiles.mcz");
-    animzTiles.read("/spiffs/animz.mcz");
-    playerTiles.read("/spiffs/annie.mcz");
+    tiles.read("/spiffs/tiles.mcz", true);
+    animzTiles.read("/spiffs/animz.mcz", true);
+    playerTiles.read("/spiffs/annie.mcz", true);
 
     if (!font.read("/spiffs/font.bin"))
     {
@@ -191,13 +217,49 @@ std::mutex &CEngine::mutex()
     return g_mutex;
 }
 
-void CEngine::animate()
+void CEngine::mainLoop(int ticks)
 {
-    for (int i = 0; i < sizeof(animzSeq) / sizeof(AnimzSeq); ++i)
+    CGame &game = *m_game;
+
+    if (game.mode() != CGame::MODE_LEVEL)
     {
-        AnimzSeq &seq = animzSeq[i];
-        int j = seq.srcTile;
-        tileReplacement[j] = seq.startSeq + seq.index;
-        seq.index = seq.index < seq.count - 1 ? seq.index + 1 : 0;
+        return;
+    }
+
+    if (ticks % 3 == 0 && !game.isPlayerDead())
+    {
+        game.managePlayer();
+    }
+
+    uint16_t joy = readJoystick();
+    if (ticks % 3 == 0)
+    {
+        if (game.health() < m_healthRef && m_playerFrameOffset != 7)
+        {
+            m_playerFrameOffset = 7;
+        }
+        else if (joy)
+        {
+            m_playerFrameOffset = (m_playerFrameOffset + 1) % 7;
+        }
+        else
+        {
+            m_playerFrameOffset = 0;
+        }
+        m_healthRef = game.health();
+        m_animator->animate();
+    }
+
+    game.manageMonsters(ticks);
+
+    if (!game.isGameOver())
+    {
+        if (game.goalCount() == 0)
+        {
+            m_healthRef = 0;
+            mutex().lock();
+            game.nextLevel();
+            mutex().unlock();
+        }
     }
 }

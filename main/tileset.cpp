@@ -1,22 +1,24 @@
 #include "tileset.h"
 #include <cstring>
 #include <cstdio>
-#include "colors.h"
+#include <cassert>
 
 static const char SIG[] = "MCXZ";
 static const uint16_t VERSION = 0;
 
-bool CTileSet::m_enableFlipColors = false;
-
-CTileSet::CTileSet(int width, int height, int count)
+CTileSet::CTileSet(int width, int height, int count, int pixelWidth)
 {
+    m_pixelWidth = pixelWidth ? pixelWidth : pixel16;
+    assert(m_pixelWidth == pixel16 || m_pixelWidth == pixel24);
     m_height = height;
     m_width = width;
+    assert(m_width > 0 && m_height > 0);
     m_size = count;
-    m_tiles = count ? new uint16_t[m_height * m_width * m_size] : nullptr;
-    if (count)
+    m_tileSize = m_height * m_width * m_pixelWidth;
+    m_tiles = (count * m_tileSize) > 0 ? new uint8_t[m_tileSize * m_size] : nullptr;
+    if (m_tiles)
     {
-        memset(m_tiles, 0, m_height * m_width * m_size * sizeof(uint16_t));
+        memset(m_tiles, 0, m_tileSize * m_size);
     }
 }
 
@@ -25,35 +27,36 @@ CTileSet::~CTileSet()
     forget();
 }
 
-uint16_t *CTileSet::operator[](int i)
+void *CTileSet::operator[](int i)
 {
-    return m_tiles + i * m_height * m_width;
+    return m_tiles + i * m_tileSize;
 }
 
-void CTileSet::set(int i, const uint16_t *pixels)
+// set tile
+// i        index of target tile
+// pixels   16bits color array
+void CTileSet::set(int i, const void *pixels)
 {
-    int offset = m_height * m_width * i;
-    int tileSize = m_height * m_width * sizeof(uint16_t);
-    memcpy(m_tiles + offset, pixels, tileSize);
+    memcpy(m_tiles + i * m_tileSize, pixels, m_tileSize);
 }
 
-int CTileSet::add(const uint16_t *tile)
+int CTileSet::add(const void *tile)
 {
-    int unitSize = m_height * m_width;
-    int blocksize = unitSize * sizeof(uint16_t);
-    uint16_t *t = new uint16_t[unitSize * (m_size + 1)];
+    printf("size:%d;  %d x %d x %d = %d \n", m_size, m_height, m_width, m_pixelWidth, m_tileSize);
+    uint8_t *t = new uint8_t[(m_size + 1) * m_tileSize];
     if (m_tiles != nullptr)
     {
-        memcpy(t, m_tiles, blocksize * m_size);
+        memcpy(t, m_tiles, m_tileSize * m_size);
         delete[] m_tiles;
     }
-    memcpy(t + unitSize * m_size, tile, blocksize);
+    memcpy(t + m_size * m_tileSize, tile, m_tileSize);
     m_tiles = t;
-
     return ++m_size;
 }
 
-bool CTileSet::read(const char *fname)
+// read
+// read tileset from file
+bool CTileSet::read(const char *fname, bool flipByteOrder)
 {
     FILE *sfile = fopen(fname, "rb");
     if (sfile)
@@ -68,27 +71,36 @@ bool CTileSet::read(const char *fname)
             printf("wrong signature\n");
             return false;
         }
-
-        if (version > VERSION)
+        if ((version & 0xff) > VERSION)
         {
-            printf("wrong version\n");
+            printf("wrong version : 0x%.x\n", version);
+            return false;
+        }
+        m_pixelWidth = version >> 8 ? version >> 8 : pixel16;
+        if (m_pixelWidth != pixel16 && m_pixelWidth != pixel24)
+        {
+            printf("wrong pixelWidth: %d\n", m_pixelWidth);
             return false;
         }
 
         m_width = m_height = m_size = 0;
         fread(&m_width, 1, 1, sfile);
         fread(&m_height, 1, 1, sfile);
-        fread(&m_size, 4, 1, sfile);
-
+        fread(&m_size, 2, 1, sfile);
+        uint16_t t;
+        fread(&t, 2, 1, sfile);
+        m_tileSize = m_width * m_height * m_pixelWidth;
         if (m_size)
         {
-            m_tiles = new uint16_t[m_height * m_width * m_size];
-            fread(m_tiles, m_height * m_width * m_size * sizeof(uint16_t), 1, sfile);
-            if (m_enableFlipColors)
+            m_tiles = new uint8_t[m_size * m_tileSize];
+            fread(m_tiles, m_size * m_tileSize, 1, sfile);
+            if (flipByteOrder && m_pixelWidth == pixel16)
             {
+                // for displays that have a reversed byte order
+                uint16_t *pixels = reinterpret_cast<uint16_t *>(m_tiles);
                 for (int i = 0; i < m_height * m_width * m_size; ++i)
                 {
-                    m_tiles[i] = flipColor(m_tiles[i]);
+                    pixels[i] = flipColor(pixels[i]);
                 }
             }
         }
@@ -97,25 +109,52 @@ bool CTileSet::read(const char *fname)
     return sfile != nullptr;
 }
 
-bool CTileSet::write(const char *fname)
+// write
+// write tileset to file
+bool CTileSet::write(const char *fname, bool flipByteOrder, bool headerless)
 {
     FILE *tfile = fopen(fname, "wb");
     if (tfile)
     {
-        fwrite(SIG, strlen(SIG), 1, tfile);
-        fwrite(&VERSION, sizeof(VERSION), 1, tfile);
-        fwrite(&m_width, 1, 1, tfile);
-        fwrite(&m_height, 1, 1, tfile);
-        fwrite(&m_size, 4, 1, tfile);
+        if (!headerless)
+        {
+            fwrite(SIG, strlen(SIG), 1, tfile);
+            uint16_t version = VERSION + (m_pixelWidth << 8);
+            fwrite(&version, sizeof(version), 1, tfile);
+            fwrite(&m_width, 1, 1, tfile);
+            fwrite(&m_height, 1, 1, tfile);
+            fwrite(&m_size, 2, 1, tfile);
+            uint16_t t = 0;
+            fwrite(&t, 2, 1, tfile); // reserved
+        }
         if (m_size)
         {
-            fwrite(m_tiles, m_height * m_width * m_size * sizeof(uint16_t), 1, tfile);
+            if (flipByteOrder && m_pixelWidth == pixel16)
+            {
+                int tilePixels = m_width * m_height;
+                uint16_t *tmpTile = new uint16_t[tilePixels];
+                for (int i = 0; i < m_size; ++i)
+                {
+                    memcpy(tmpTile, m_tiles + m_tileSize * i, m_tileSize);
+                    for (int j = 0; j < tilePixels; ++j)
+                    {
+                        tmpTile[j] = flipColor(tmpTile[j]);
+                    }
+                    fwrite(tmpTile, m_tileSize, 1, tfile);
+                }
+                delete[] tmpTile;
+            }
+            else
+            {
+                fwrite(m_tiles, m_size * m_tileSize, 1, tfile);
+            }
         }
         fclose(tfile);
     }
     return tfile != nullptr;
 }
 
+// clear tileset
 void CTileSet::forget()
 {
     if (m_tiles)
@@ -126,6 +165,7 @@ void CTileSet::forget()
     m_size = 0;
 }
 
+// return tileset size in tiles
 int CTileSet::size()
 {
     return m_size;
@@ -135,14 +175,10 @@ int CTileSet::size()
 // extend size of tileset by x tiles
 int CTileSet::extendBy(int tiles)
 {
-    //     printf("size:%d  %d x %d \n", m_size, m_height, m_width);
-    //
-    int unitSize = m_height * m_width;
-    int blocksize = unitSize * sizeof(uint16_t);
-    uint16_t *t = new uint16_t[unitSize * (m_size + tiles)];
+    uint8_t *t = new uint8_t[m_tileSize * (m_size + tiles)];
     if (m_tiles != nullptr)
     {
-        memcpy(t, m_tiles, blocksize * m_size);
+        memcpy(t, m_tiles, m_size * m_tileSize);
         delete[] m_tiles;
     }
     m_tiles = t;
@@ -150,7 +186,8 @@ int CTileSet::extendBy(int tiles)
     return m_size;
 }
 
-void CTileSet::toggleFlipColors(bool b)
+// Flip bytes in a 16bbp pixel
+uint16_t CTileSet::flipColor(const uint16_t c)
 {
-    m_enableFlipColors = b;
+    return (c >> 8) + ((c & 0xff) << 8);
 }

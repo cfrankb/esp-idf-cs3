@@ -75,7 +75,7 @@ bool CDisplay::test()
     {
         for (int x = 0; x < 15; ++x)
         {
-            drawTile(x * 16, y * 16, tiles[i], 1);
+            drawTile(x * 16, y * 16, reinterpret_cast<uint16_t *>(tiles[i]), 1);
             i++;
             if (i >= tiles.size())
             {

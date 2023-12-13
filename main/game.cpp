@@ -35,6 +35,11 @@ CMap &CGame::getMap()
     return map;
 }
 
+CActor &CGame::player()
+{
+    return m_player;
+}
+
 bool CGame::move(int aim)
 {
     if (m_player.canMove(aim))
@@ -49,32 +54,48 @@ bool CGame::move(int aim)
 
 void CGame::consume()
 {
-    uint8_t pu = m_player.getPU();
-    const TileDef def = getTileDef(pu);
+    const uint8_t pu = m_player.getPU();
+    const TileDef &def = getTileDef(pu);
 
     if (def.type == TYPE_PICKUP)
     {
-        m_score += def.score;
+        addPoints(def.score);
         m_player.setPU(TILES_BLANK);
         addHealth(def.health);
     }
     else if (def.type == TYPE_KEY)
     {
-        m_score += def.score;
+        addPoints(def.score);
         m_player.setPU(TILES_BLANK);
         addKey(pu);
         addHealth(def.health);
     }
     else if (def.type == TYPE_DIAMOND)
     {
-        m_score += def.score;
+        addPoints(def.score);
         m_player.setPU(TILES_BLANK);
         --m_diamonds;
         addHealth(def.health);
     }
     else if (def.type == TYPE_SWAMP)
     {
-        addHealth(-1);
+        addHealth(def.health);
+    }
+
+    // apply flags
+    if (def.flags & FLAG_EXTRA_LIFE)
+    {
+        addLife();
+    }
+
+    if (def.flags & FLAG_GODMODE)
+    {
+        m_godModeTimer = GODMODE_TIMER;
+    }
+
+    if (def.flags & FLAG_EXTRA_SPEED)
+    {
+        m_extraSpeedTimer = EXTRASPEED_TIMER;
     }
 
     // trigger key
@@ -103,6 +124,8 @@ void CGame::nextLevel()
 
 void CGame::restartLevel()
 {
+    m_godModeTimer = 0;
+    m_extraSpeedTimer = 0;
     loadLevel(true);
 }
 
@@ -118,30 +141,18 @@ bool CGame::loadLevel(bool restart)
         return false;
     }
 
-    printf("file opened\n");
-    printf("levels: %d\n", m_arch.size());
-
+    printf("maparch opened - levels: %d\n", m_arch.size());
     int i = m_level % m_arch.size();
-    printf("offset: %ld\n", m_arch[i]);
     if (fseek(sfile, m_arch[i], SEEK_SET) != 0)
     {
         printf("can't seek %s to level %d", m_mapFile.c_str(), i + 1);
         return false;
     }
-
-    typedef struct
+    if (!map.read(sfile))
     {
-        uint8_t head[4];
-        uint16_t version;
-        uint8_t len;
-        uint8_t hei;
-    } header_t;
-    header_t header;
-
-    // TODO: check header
-    fread(&header, sizeof(header_t), 1, sfile);
-    printf("len: %d hei:%d\n", header.len, header.hei);
-    map.fromStream(sfile, header.len, header.hei);
+        printf("can't read map: %s\n", map.lastError());
+        return false;
+    }
     fclose(sfile);
 
     printf("level loaded\n");
@@ -205,28 +216,60 @@ int CGame::findMonsterAt(int x, int y)
     return -1;
 }
 
-void CGame::manageMonsters()
+void CGame::manageMonsters(int ticks)
 {
+    const int speedCount = 9;
+    bool speeds[speedCount];
+    for (uint32_t i = 0; i < sizeof(speeds); ++i)
+    {
+        speeds[i] = i ? (ticks % i) == 0 : true;
+    }
+
     uint8_t dirs[] = {AIM_UP, AIM_DOWN, AIM_LEFT, AIM_RIGHT};
     std::vector<CActor> newMonsters;
 
     for (int i = 0; i < m_monsterCount; ++i)
     {
         CActor &actor = m_monsters[i];
-        uint8_t c = map.at(actor.getX(), actor.getY());
-        const TileDef &def = getTileDef(c);
+        uint8_t cs = map.at(actor.getX(), actor.getY());
+        const TileDef &def = getTileDef(cs);
+        if (!speeds[def.speed])
+        {
+            continue;
+        }
         if (def.type == TYPE_MONSTER)
         {
             if (actor.isPlayerThere(actor.getAim()))
             {
                 // apply health damages
                 addHealth(def.health);
+                if (def.ai & AI_STICKY)
+                {
+                    continue;
+                }
             }
 
             int aim = actor.findNextDir();
             if (aim != AIM_NONE)
             {
                 actor.move(aim);
+                if (!(def.ai & AI_ROUND))
+                {
+                    continue;
+                }
+            }
+            for (uint8_t i = 0; i < sizeof(dirs); ++i)
+            {
+                if (actor.isPlayerThere(dirs[i]))
+                {
+                    // apply health damages
+                    addHealth(def.health);
+                    if (def.ai & AI_FOCUS)
+                    {
+                        actor.setAim(dirs[i]);
+                    }
+                    break;
+                }
             }
         }
         else if (def.type == TYPE_DRONE)
@@ -256,8 +299,8 @@ void CGame::manageMonsters()
             for (uint8_t i = 0; i < sizeof(dirs); ++i)
             {
                 Pos p = CGame::translate(Pos{actor.getX(), actor.getY()}, dirs[i]);
-                uint8_t c = map.at(p.x, p.y);
-                const TileDef &defT = getTileDef(c);
+                const uint8_t ct = map.at(p.x, p.y);
+                const TileDef &defT = getTileDef(ct);
                 if (defT.type == TYPE_PLAYER)
                 {
                     // apply damage from config
@@ -292,14 +335,33 @@ void CGame::manageMonsters()
 
 void CGame::managePlayer()
 {
+    m_godModeTimer = m_godModeTimer > 0 ? m_godModeTimer - 1 : 0;
+    m_extraSpeedTimer = m_extraSpeedTimer > 0 ? m_extraSpeedTimer - 1 : 0;
+    auto const pu = m_player.getPU();
+    if (pu == TILES_SWAMP)
+    {
+        // apply health damage
+        const TileDef &def = getTileDef(pu);
+        addHealth(def.health);
+    }
+
     uint16_t joy = readJoystick();
-    joy && ((joy & JOY_UP && move(AIM_UP)) ||
-            (joy & JOY_DOWN && move(AIM_DOWN)) ||
-            (joy & JOY_LEFT && move(AIM_LEFT)) ||
-            (joy & JOY_RIGHT && move(AIM_RIGHT)));
+
+    // move player
+    uint8_t mask = 1;
+    uint8_t aims[] = {AIM_UP, AIM_DOWN, AIM_LEFT, AIM_RIGHT};
+    for (uint8_t i = 0; i < AIM_COUNT; ++i)
+    {
+        uint8_t aim = aims[i];
+        if ((joy & mask) && move(aim))
+        {
+            break;
+        }
+        mask += mask;
+    }
 }
 
-Pos CGame::translate(const Pos p, int aim)
+Pos CGame::translate(const Pos &p, int aim)
 {
     Pos t = p;
 
@@ -335,7 +397,7 @@ Pos CGame::translate(const Pos p, int aim)
 
 bool CGame::hasKey(uint8_t c)
 {
-    for (int i = 0; i < sizeof(m_keys); ++i)
+    for (uint32_t i = 0; i < sizeof(m_keys); ++i)
     {
         if (m_keys[i] == c)
         {
@@ -347,7 +409,7 @@ bool CGame::hasKey(uint8_t c)
 
 void CGame::addKey(uint8_t c)
 {
-    for (int i = 0; i < sizeof(m_keys); ++i)
+    for (uint32_t i = 0; i < sizeof(m_keys); ++i)
     {
         if (m_keys[i] == c)
         {
@@ -376,7 +438,7 @@ void CGame::clearAttr(uint8_t attr)
             if (tileAttr == attr)
             {
                 const uint8_t tile = map.at(x, y);
-                const TileDef def = getTileDef(tile);
+                const TileDef &def = getTileDef(tile);
                 if (def.type == TYPE_DIAMOND)
                 {
                     --m_diamonds;
@@ -394,7 +456,7 @@ void CGame::addHealth(int hp)
     {
         m_health = std::min(m_health + hp, static_cast<int>(MAX_HEALTH));
     }
-    else if (hp < 0)
+    else if (hp < 0 && !m_godModeTimer)
     {
         m_health = std::max(m_health + hp, 0);
     }
@@ -430,12 +492,10 @@ void CGame::restartGame()
     m_level = 0;
     m_score = 0;
     m_lives = DEFAULT_LIVES;
+    m_nextLife = SCORE_LIFE;
+    m_godModeTimer = 0;
+    m_extraSpeedTimer = 0;
     loadLevel(false);
-}
-
-CActor &CGame::player()
-{
-    return m_player;
 }
 
 int CGame::score()
@@ -463,9 +523,45 @@ int CGame::level()
     return m_level;
 }
 
-int CGame::mode()
+uint8_t *CGame::keys()
 {
-    return m_mode;
+    return m_keys;
+}
+
+void CGame::addPoints(int points)
+{
+    m_score += points;
+    if (m_score >= m_nextLife)
+    {
+        m_nextLife += SCORE_LIFE;
+        addLife();
+    }
+}
+
+void CGame::addLife()
+{
+    m_lives = std::min(m_lives + 1, static_cast<int>(MAX_LIVES));
+}
+
+int CGame::godModeTimer()
+{
+    return m_godModeTimer;
+}
+
+int CGame::playerSpeed()
+{
+    return m_extraSpeedTimer ? FAST_PLAYER_SPEED : DEFAULT_PLAYER_SPEED;
+}
+
+void CGame::getMonsters(CActor *&monsters, int &count)
+{
+    monsters = m_monsters;
+    count = m_monsterCount;
+}
+
+CActor &CGame::getMonster(int i)
+{
+    return m_monsters[i];
 }
 
 bool CGame::loadMapIndex(const char *filename)

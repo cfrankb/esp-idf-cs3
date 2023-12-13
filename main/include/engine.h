@@ -4,6 +4,7 @@
 #include <mutex>
 
 class CGame;
+class CAnimator;
 
 class CEngine
 {
@@ -15,14 +16,18 @@ public:
     CGame &game();
     void drawScreen();
     void drawLevelIntro();
-    void animate();
+    void mainLoop(int ticks);
 
     enum
     {
+        PLAYER_FRAMES = 8,
         NO_ANIMZ = 255,
     };
 
 protected:
+    CAnimator *m_animator = nullptr;
+    int m_playerFrameOffset = 0;
+    int m_healthRef = 0;
     CGame *m_game = nullptr;
     bool init();
 };

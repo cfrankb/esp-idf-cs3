@@ -8,10 +8,12 @@
 
 typedef struct
 {
-    uint8_t ch;
+    uint8_t flags;
     uint8_t type;
     uint8_t score;
     int8_t health;
+    uint8_t speed;
+    uint8_t ai;
     bool hidden;
     const char * basename;
 } TileDef;
@@ -76,10 +78,10 @@ const TileDef & getTileDef(int i);
 #define TILES_STATUE         0x36
 #define TILES_TOMB           0x37
 #define TILES_MUSHROOM       0x38
-#define TILES_SMALL_MUSH     0x39
-#define TILES_SMALL_MUSH_2   0x3a
-#define TILES_SMALL_MUSH_3   0x3b
-#define TILES_SMALL_MUSH_4   0x3c
+#define TILES_SMALL_MUSH0    0x39
+#define TILES_SMALL_MUSH1    0x3a
+#define TILES_SMALL_MUSH2    0x3b
+#define TILES_SMALL_MUSH3    0x3c
 #define TILES_POT            0x3d
 #define TILES_POT_2          0x3e
 #define TILES_JAR1           0x3f
