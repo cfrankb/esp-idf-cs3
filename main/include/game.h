@@ -101,7 +101,5 @@ protected:
     void addHealth(int hp);
     void addPoints(int points);
     void addLife();
-
-    CEngine *m_engine;
 };
 #endif

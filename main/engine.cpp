@@ -2,7 +2,6 @@
 #include <cstring>
 #include <string>
 #include <stdint.h>
-#include "freertos/FreeRTOS.h"
 #include "engine.h"
 #include "game.h"
 #include "colors.h"
@@ -27,36 +26,18 @@ CDisplay display;
 CTileSet tiles(TILESIZE, TILESIZE);
 CTileSet animzTiles(TILESIZE, TILESIZE);
 CTileSet playerTiles(TILESIZE, TILESIZE);
-// uint8_t tileReplacement[256];
 std::mutex g_mutex;
 
-typedef struct
-{
-    uint8_t srcTile;
-    uint8_t startSeq;
-    uint8_t count;
-    uint8_t index;
-} AnimzSeq;
+CEngine *g_engine = nullptr;
 
-AnimzSeq animzSeq[] = {
-    {TILES_DIAMOND, ANIMZ_DIAMOND, 13, 0},
-    {TILES_INSECT1, ANIMZ_INSECT1, 2, 0},
-    {TILES_SWAMP, ANIMZ_SWAMP, 2, 0},
-    {TILES_ALPHA, ANIMZ_ALPHA, 2, 0},
-    {TILES_FORCEF94, ANIMZ_FORCEF94, 8, 0},
-    {TILES_VAMPLANT, ANIMZ_VAMPLANT, 2, 0},
-    {TILES_ORB, ANIMZ_ORB, 4, 0},
-    {TILES_TEDDY93, ANIMZ_TEDDY93, 2, 0},
-    {TILES_LUTIN, ANIMZ_LUTIN, 2, 0},
-    {TILES_OCTOPUS, ANIMZ_OCTOPUS, 2, 0},
-    {TILES_TRIFORCE, ANIMZ_TRIFORCE, 4, 0},
-    {TILES_YAHOO, ANIMZ_YAHOO, 2, 0},
-    {TILES_YIGA, ANIMZ_YIGA, 2, 0},
-    {TILES_YELKILLER, ANIMZ_YELKILLER, 2, 0},
-    {TILES_MANKA, ANIMZ_MANKA, 2, 0},
-    {TILES_MAXKILLER, ANIMZ_MAXKILLER, 2, 0},
-    // {TILES_WHTEWORM, ANIMZ_WHTEWORM, 2, 0},
-};
+CEngine *CEngine::getEngine()
+{
+    if (!g_engine)
+    {
+        g_engine = new CEngine();
+    }
+    return g_engine;
+}
 
 CEngine::CEngine()
 {
@@ -194,7 +175,6 @@ bool CEngine::init()
     initSpiffs();
     initJoystick();
     display.init();
-    // memset(tileReplacement, NO_ANIMZ, sizeof(tileReplacement));
     m_animator = new CAnimator();
 
     m_game->loadMapIndex("/spiffs/levels.mapz");

@@ -9,7 +9,7 @@ class CAnimator;
 class CEngine
 {
 public:
-    CEngine();
+    static CEngine *getEngine();
     ~CEngine();
 
     std::mutex &mutex();
@@ -25,6 +25,7 @@ public:
     };
 
 protected:
+    CEngine();
     CAnimator *m_animator = nullptr;
     int m_playerFrameOffset = 0;
     int m_healthRef = 0;

@@ -55,7 +55,7 @@ void drawScreenTask(void *pvParameter)
 
 extern "C" void app_main(void)
 {
-    engine = new CEngine();
+    engine = CEngine::getEngine();
     CGame &game = engine->game();
 
     uint32_t before_free = esp_get_free_heap_size();
