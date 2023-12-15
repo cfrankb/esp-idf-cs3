@@ -8,7 +8,7 @@
 #include "esp_idf_version.h"
 #include "soc/clk_tree_defs.h"
 #include <cstring>
-
+#include "esp_idf_version.h"
 // #define DEBUG_JOYSTICK
 
 const adc_channel_t ADC_CHANX = static_cast<adc_channel_t>(CONFIG_X_AXIS);

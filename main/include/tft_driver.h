@@ -37,6 +37,11 @@ bool spi_master_write_addr(TFT_t *dev, uint16_t addr1, uint16_t addr2);
 bool spi_master_write_comm_byte(TFT_t *dev, uint8_t cmd);
 
 void lcdInit(TFT_t *dev, uint16_t model, int width, int height, int offsetx, int offsety);
+void init9226(TFT_t *dev, int &width, int &height);
+void init9225(TFT_t *dev, int &width, int &height);
+void init7789(TFT_t *dev, int &width, int &height);
+void init9341(TFT_t *dev, int &width, int &height);
+void init7796(TFT_t *dev, int &width, int &height);
 void lcdInversionOn(TFT_t *dev);
 void lcdInversionOff(TFT_t *dev);
 void lcdBacklightOn(TFT_t *dev);

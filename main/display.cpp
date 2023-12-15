@@ -6,7 +6,7 @@
 #include "tileset.h"
 #include "buffer.h"
 #include "colors.h"
-#include "driver.h"
+#include "tft_driver.h"
 
 static const char *TAG = "display";
 

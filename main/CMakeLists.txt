@@ -12,7 +12,7 @@ set(SOURCES
     actor.cpp
     font.cpp
     colors.cpp
-    driver.cpp
+    tft_driver.cpp
     engine.cpp
     maparch.cpp
     animator.cpp
