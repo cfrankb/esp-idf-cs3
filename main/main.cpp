@@ -1,7 +1,6 @@
 // https://embeddedtutorials.com/eps32/esp-idf-cpp-with-cmake-for-esp32/
 
 #include <stdio.h>
-
 #include "driver/gpio.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -9,7 +8,6 @@
 #include <cstring>
 #include <cstdio>
 #include <algorithm>
-
 #include "esphelpers.h"
 #include "tileset.h"
 #include "display.h"

@@ -41,6 +41,7 @@ void init9226(TFT_t *dev, int &width, int &height);
 void init9225(TFT_t *dev, int &width, int &height);
 void init7789(TFT_t *dev, int &width, int &height);
 void init9341(TFT_t *dev, int &width, int &height);
+void init9341v2(TFT_t *dev, int &width, int &height);
 void init7796(TFT_t *dev, int &width, int &height);
 void lcdInversionOn(TFT_t *dev);
 void lcdInversionOff(TFT_t *dev);
