@@ -10,6 +10,8 @@
 #include <cstring>
 #include "esp_idf_version.h"
 // #define DEBUG_JOYSTICK
+#define LOW_BOUND 500
+#define HI_BOUND 2000
 
 const adc_channel_t ADC_CHANX = static_cast<adc_channel_t>(CONFIG_X_AXIS);
 const adc_channel_t ADC_CHANY = static_cast<adc_channel_t>(CONFIG_Y_AXIS);
@@ -89,11 +91,11 @@ uint16_t readJoystick()
     int flipY = 0;
 #endif
 
-    if (adc_vry < 50)
+    if (adc_vry < LOW_BOUND)
     {
         joy |= (JOY_DOWN ^ flipY);
     }
-    else if (adc_vry > 3000)
+    else if (adc_vry > HI_BOUND)
     {
         joy |= (JOY_UP ^ flipY);
     }
@@ -104,11 +106,11 @@ uint16_t readJoystick()
     int flipX = 0;
 #endif
 
-    if (adc_vrx < 50)
+    if (adc_vrx < LOW_BOUND)
     {
         joy |= (JOY_LEFT ^ flipX);
     }
-    else if (adc_vrx > 3000)
+    else if (adc_vrx > HI_BOUND)
     {
         joy |= (JOY_RIGHT ^ flipX);
     }

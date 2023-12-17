@@ -1,13 +1,15 @@
 // https://embeddedtutorials.com/eps32/esp-idf-cpp-with-cmake-for-esp32/
 
 #include <stdio.h>
-#include "driver/gpio.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "esp_timer.h"
 #include <cstring>
 #include <cstdio>
 #include <algorithm>
+#include "driver/gpio.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/timers.h"
+#include "esp_system.h"
+#include "esp_timer.h"
 #include "esphelpers.h"
 #include "tileset.h"
 #include "display.h"
@@ -33,7 +35,7 @@ void drawScreenTask(void *pvParameter)
         case CGame::MODE_RESTART:
         case CGame::MODE_GAMEOVER:
             engine->drawLevelIntro();
-            vTaskDelay(2000 / portTICK_PERIOD_MS);
+            delayMS(2000);
             if (game.mode() == CGame::MODE_GAMEOVER)
             {
                 game.restartGame();
@@ -47,7 +49,7 @@ void drawScreenTask(void *pvParameter)
             engine->drawScreen();
         }
 
-        vTaskDelay(20 / portTICK_PERIOD_MS);
+        delayMS(20);
     }
 }
 
@@ -71,13 +73,13 @@ extern "C" void app_main(void)
 
     while (1)
     {
-        vTaskDelay(40 / portTICK_PERIOD_MS);
+        delayMS(40);
 
         engine->mainLoop(ticks);
         if (game.isPlayerDead())
         {
             game.killPlayer();
-            vTaskDelay(500 / portTICK_PERIOD_MS);
+            delayMS(500);
             if (!game.isGameOver())
             {
                 engine->mutex().lock();

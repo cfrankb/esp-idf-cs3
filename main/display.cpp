@@ -1,6 +1,5 @@
 #include <cstring>
 #include <algorithm>
-
 #include "esp_log.h"
 #include "display.h"
 #include "tileset.h"
@@ -30,25 +29,27 @@ bool CDisplay::init()
 
 #if CONFIG_ILI9225
     uint16_t model = 0x9225;
-#endif
-#if CONFIG_ILI9225G
+#elif CONFIG_ILI9225G
     uint16_t model = 0x9226;
-#endif
-#if CONFIG_ILI9340
+#elif CONFIG_ILI9340
     uint16_t model = 0x9340;
-#endif
-#if CONFIG_ILI9341
+#elif CONFIG_ILI9341
     uint16_t model = 0x9341;
-#endif
-#if CONFIG_ST7735
+#elif CONFIG_ST7735
     uint16_t model = 0x7735;
-#endif
-#if CONFIG_ST7796
+#elif CONFIG_ST7796
     uint16_t model = 0x7796;
-#endif
-#if CONFIG_ST7789
+#elif CONFIG_ST7789
     uint16_t model = 0x7789;
+#else
+    uint16_t model = 0;
 #endif
+
+    if (model == 0)
+    {
+        ESP_LOGE(TAG, "Invalid model. Please set model using menuconfig.");
+        return false;
+    }
 
     lcdInit(&m_dev, model, CONFIG_WIDTH, CONFIG_HEIGHT, CONFIG_OFFSETX, CONFIG_OFFSETY);
 

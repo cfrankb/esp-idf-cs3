@@ -1,5 +1,7 @@
 #include "esphelpers.h"
-
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include <dirent.h>
 static const char *TAG = "esphelpers";
 
 static void SPIFFS_Directory(const char *path)
@@ -64,4 +66,12 @@ bool initSpiffs()
      */
     SPIFFS_Directory("/spiffs/");
     return true;
+}
+
+void delayMS(int ms)
+{
+    int _ms = ms + (portTICK_PERIOD_MS - 1);
+    TickType_t xTicksToDelay = _ms / portTICK_PERIOD_MS;
+    // ESP_LOGD(TAG, "ms=%d _ms=%d portTICK_PERIOD_MS=%d xTicksToDelay=%d", ms, _ms, portTICK_PERIOD_MS, xTicksToDelay);
+    vTaskDelay(xTicksToDelay);
 }

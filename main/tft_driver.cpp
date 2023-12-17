@@ -1,11 +1,11 @@
 #include <cstring>
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
+
 #include "tft_driver.h"
 #include "esp_log.h"
 #include "driver/spi_master.h"
 #include "driver/gpio.h"
 #include "esp_idf_version.h"
+#include "esphelpers.h"
 
 static const char *TAG = "driver";
 
@@ -300,14 +300,6 @@ void lcdDrawTile(TFT_t *dev, RectXY rect, uint16_t size, uint16_t *colors, bool 
             spi_master_write_colors(dev, colors, size, copyBytes);
         }
     } // endif 0x9226
-}
-
-void delayMS(int ms)
-{
-    int _ms = ms + (portTICK_PERIOD_MS - 1);
-    TickType_t xTicksToDelay = _ms / portTICK_PERIOD_MS;
-    // ESP_LOGD(TAG, "ms=%d _ms=%d portTICK_PERIOD_MS=%d xTicksToDelay=%d", ms, _ms, portTICK_PERIOD_MS, xTicksToDelay);
-    vTaskDelay(xTicksToDelay);
 }
 
 void lcdInit(TFT_t *dev, uint16_t model, int width, int height, int offsetx, int offsety)
