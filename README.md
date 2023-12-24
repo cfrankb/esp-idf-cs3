@@ -6,11 +6,11 @@ Current status is alpha. 90% of the core mechanic has been implemented.
 
 ## Original MS-DOS
 
-![Image](images/Screenshot_2022-10-19_21-01-20.png 'icon')
+![Image](images/Screenshot_2022-10-19_21-01-20.png "icon")
 
 ## ESP-32
 
-![Image](images/20221103_155303-50.jpg 'icon')
+![Image](images/20231224_082059.jpg "icon")
 
 I am also releasing the source code for the map editor:
 https://github.com/cfrankb/cs3-map-edit

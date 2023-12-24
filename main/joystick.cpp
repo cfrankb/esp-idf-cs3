@@ -1,14 +1,11 @@
 #include "joystick.h"
 #include "esp_err.h"
 #include "esp_log.h"
-#include "esp_spiffs.h"
 #include "driver/gpio.h"
 #include "esp_adc/adc_oneshot.h"
 #include "esp_adc/adc_continuous.h"
 #include "esp_idf_version.h"
-#include "soc/clk_tree_defs.h"
 #include <cstring>
-#include "esp_idf_version.h"
 // #define DEBUG_JOYSTICK
 #define LOW_BOUND 500
 #define HI_BOUND 2000
